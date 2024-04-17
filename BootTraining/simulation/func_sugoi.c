@@ -1,6 +1,6 @@
 #import <stdio.h>
 #import <math.h>
-#import "kanzentai_header.h"
+#import "header_tuyoi.h"
 
 /// calcualte dynamics and return dw/dt
 void dynamics(double *omega1, double **Iinvese, double *T,double omega2){
@@ -15,7 +15,7 @@ void dynamics(double *omega1, double **Iinvese, double *T,double omega2){
 };
 
 /// calcualte kinematics and return dq/dt
-void kinematics(double *q1, double **OMEGA, double *q2){
+void kinematics(double *q1, double **OMEGA, double T, double *q2){
     int count=4;
     for ( int i = 0; i < count; i++)
     {
@@ -31,11 +31,23 @@ void rk4(double dt,double *x,double t){
 };
 
 //calculate the products of scalar by vector
-void vector1d(double t, double *vector){
+void product_vec(double t, int size, double *vector_input,double *vector_output){
+    for (int i = 0; i < size+1; i++)
+    {
+        vector_output[i] *= t;
+    }
 };
 
 //calculate the products of scalar by vector
-void vector2d(double t, double *vector){
+void product_mat(double t, int col,int row , double **matrix_input, double **matrix_output){
+    for ( i = 0; i < col+1; i++)
+    {
+        for ( j = 0; j < row+1; j++)
+        {
+           matrix_output[i][j] *= t; 
+        }
+    }
+    
 };
 
 //calculete an inverse of an 4×4 inertia tensor I 
