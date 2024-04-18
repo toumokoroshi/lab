@@ -1,28 +1,25 @@
 #ifndef HEADER_H
 #define HEADER_H
 
-/// calcualte dynamics and return dw/dt
-void dynamics(double *q1, double *omega){
-};
-
-/// calcualte kinematics and return dq/dt
-void kinematics(double **inv_I,double *omega,double *){
-};
-
-/// discrizate functions and calcualte x_n+1 from x_n
-void rk4(double dt,double *x,double t){
-};
-
 //calculate the products of scalar by vector
-void vector1d(double t, double *vector){
-};
+void product_vec(double t, int size, double *vector_input,double *vector_output){}
 
-//calculate the products of scalar by vector
-void vector2d(double t, double *vector){
-};
+//calculate the products of scalar by matrix
+void product_mat(double t, int col, int row, double **matrix_input, double **matrix_output){}
 
-//calculete an inverse of an 4×4 inertia tensor I 
-void inverse_I(double **I, double **inv_I){
+//calculate the sum of matrixs
+void sum_mat(int col, int row, double **matrix1,double **matrix2, **matrix_result){}
 
-}
+//calculete an inverse of an 3*3 inertia tensor I 
+void inverse_I(double **I, double **I_inv){}
+
+//calculate OMEGA for kinematics(in this program quartanion is defined like [lsin msin nsin cos])
+void set_OMEGA(double *omega, double **OMEGA){}
+
+//calcualte dynamics and return dw/dt
+void dynamics(double *omega1, double **I_inv, double *omega2){}
+
+// calcualte kinematics and return dq/dt
+void kinematics(double *q1, double **OMEGA, double *q2){}
+
 #endif
