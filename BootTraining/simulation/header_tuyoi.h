@@ -8,7 +8,7 @@ void product_vec(double t, int size, double *vector_input,double *vector_output)
 void product_mat(double t, int col, int row, double **matrix_input, double **matrix_output){}
 
 //calculate the sum of matrixs
-void sum_mat(int col, int row, double **matrix1,double **matrix2, **matrix_result){}
+void sum_mat(int col, int row, double **matrix1,double **matrix2,double **matrix_result){}
 
 //calculete an inverse of an 3*3 inertia tensor I 
 void inverse_I(double **I, double **I_inv){}
