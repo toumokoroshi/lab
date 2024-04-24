@@ -26,13 +26,11 @@ void product_mat(double t, int col,int row , double **matrix_input, double **mat
 void sum_mat(int col, int row, double **matrix1,double **matrix2,double **matrix_result){
     for (int i = 0; i < col + 1; i++)
     {
-        for ( i = 0; i < count; i++)
+        for ( j = 0; j < row; i++)
         {
             matrix_result[i][j] = matrix1[i][j] + matrix2[i][j]
         }
-        
-    }
-    
+    } 
 }
 
 //calculete an inverse of an 3*3 inertia tensor I 
@@ -125,8 +123,8 @@ void inverse_I(double I[][3], double I_inv[][3]) {
 
 
 //calculate OMEGA for kinematics(in this program quartanion is defined like [lsin msin nsin cos])
-void set_OMEGA(double *omega, double **OMEGA){
-    size=4;
+void set_OMEGA(double *omega, double (*OMEGA)[4]){
+    int size = 4;
 
     for (int i = 0; i < size; i++)
     {
@@ -148,27 +146,45 @@ void set_OMEGA(double *omega, double **OMEGA){
 }
 
 /// calcualte dynamics and return dw/dt
-void dynamics(double *omega1, double **I_inv, double omega2){
-    int count=4;
+void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_return, double *T){
+    int count = 4;
+    double buff1[3]={0};
+    double buff2[3]={0};
+
+//calculate Iw
     for ( int i = 0; i < count; i++)
     {
         for (int j = 0; j < count; j++)
         {
-            q2[i] += q1[i] * OMEGA[i][j];
+            buff1[i] += I[i][j]*omega[j];
         } 
     }
+//calculate Iw×w +T
+    buff2[0] = buff1[1]*omega[2] - buff[2]*omega[1]+T[0];
+    buff2[1] = buff1[2]*omega[0] - buff[0]*omega[2] + T[1];
+    buff2[2] = buff1[0]*omega[1] - buff[1]*omega[0] + T[2];
+
+    for (int i = 0; i < count; i++)
+    {
+        for (int j = 0; j < count; j++)
+        {
+            omega_return[i] += I[i][j]*buff[j];
+        }
+    }
+    
 }
 
 /// calcualte kinematics and return dq/dt
-void kinematics(double *q1, double **OMEGA, double *q2){
+void kinematics(double *q, double (*OMEGA)[4], double *q_diff){
     int count=4;
     for ( int i = 0; i < count; i++)
     {
+        q_diff[i] = 0
         for (int j = 0; j < count; j++)
         {
-            q2[i] += q1[i] * OMEGA[i][j];
+            q_diff[i] += q[i] * OMEGA[i][j];
         } 
-        q2[i] *= 1/2;
+        q_diff[i] *= 0.5;
     }
 }
 
