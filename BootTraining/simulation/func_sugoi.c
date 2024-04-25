@@ -1,36 +1,30 @@
-#import <stdio.h>
-#import <math.h>
-#import "header_tuyoi.h"
+#include <stdio.h>
+#include <math.h>
+#include "header_tuyoi.h"
 
 //calculate the products of scalar by vector
 void product_vec(double t, int size, double *vector_input,double *vector_output){
-    for (int i = 0; i < size+1; i++)
-    {
-        vector_output[i] *= t;
+    for (int i = 0; i < size; i++){
+        vector_output[i] = vector_input[i] * t;
     }
 }
 
 //calculate the products of scalar by matrix
-void product_mat(double t, int col,int row , double **matrix_input, double **matrix_output){
-    for ( i = 0; i < col+1; i++)
-    {
-        for ( j = 0; j < row+1; j++)
-        {
-           matrix_output[i][j] *= t; 
+void product_mat(double t, int rows,int cols , double matrix[rows][cols], double result[rows][cols]){   
+    for ( int i = 0; i < rows; i++){
+        for ( int j = 0; j < cols; j++){
+           result[i][j] = matrix[i][j]*t; 
         }
     }
-    
 }
 
 //calculate the sum of matrixs
-void sum_mat(int col, int row, double **matrix1,double **matrix2,double **matrix_result){
-    for (int i = 0; i < col + 1; i++)
-    {
-        for ( j = 0; j < row; i++)
-        {
-            matrix_result[i][j] = matrix1[i][j] + matrix2[i][j]
+void sum_matrix(int rows, int cols, double matrix1[rows][cols], double matrix2[rows][cols], double result[rows][cols]) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            result[i][j] = matrix1[i][j] + matrix2[i][j];
         }
-    } 
+    }
 }
 
 //calculete an inverse of an 3*3 inertia tensor I 
@@ -137,8 +131,8 @@ void set_OMEGA(double *omega, double (*OMEGA)[4]){
     OMEGA[1][0] = -omega[2];
     OMEGA[1][2] = omega[0];
     OMEGA[1][3] = omega[1];
-    OMEGA[2][0] = omega[2];
-    OMEGA[2][1] = -omega[1];
+    OMEGA[2][0] = omega[1];
+    OMEGA[2][1] = -omega[0];
     OMEGA[2][3] = omega[2];
     OMEGA[3][0] = -omega[0];
     OMEGA[3][1] = -omega[1];
@@ -146,12 +140,12 @@ void set_OMEGA(double *omega, double (*OMEGA)[4]){
 }
 
 /// calcualte dynamics and return dw/dt
-void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_return, double *T){
-    int count = 4;
+void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_diff, double *T){
+    int count = 3;
     double buff1[3]={0};
     double buff2[3]={0};
 
-//calculate Iw
+    //calculate Iw
     for ( int i = 0; i < count; i++)
     {
         for (int j = 0; j < count; j++)
@@ -159,16 +153,16 @@ void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_r
             buff1[i] += I[i][j]*omega[j];
         } 
     }
-//calculate Iw×w +T
-    buff2[0] = buff1[1]*omega[2] - buff[2]*omega[1]+T[0];
-    buff2[1] = buff1[2]*omega[0] - buff[0]*omega[2] + T[1];
-    buff2[2] = buff1[0]*omega[1] - buff[1]*omega[0] + T[2];
+    //calculate Iw×w +T
+    buff2[0] = buff1[1]*omega[2] - buff1[2]*omega[1]+T[0];
+    buff2[1] = buff1[2]*omega[0] - buff1[0]*omega[2] + T[1];
+    buff2[2] = buff1[0]*omega[1] - buff1[1]*omega[0] + T[2];
 
     for (int i = 0; i < count; i++)
     {
         for (int j = 0; j < count; j++)
         {
-            omega_return[i] += I[i][j]*buff[j];
+            omega_diff[i] += I[i][j]*buff2[j];
         }
     }
     
@@ -179,7 +173,7 @@ void kinematics(double *q, double (*OMEGA)[4], double *q_diff){
     int count=4;
     for ( int i = 0; i < count; i++)
     {
-        q_diff[i] = 0
+        q_diff[i] = 0;
         for (int j = 0; j < count; j++)
         {
             q_diff[i] += q[i] * OMEGA[i][j];

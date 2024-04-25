@@ -2,7 +2,7 @@
 #include "header_tuyoi.h"
 
 const double dt = 0;
-const double I[3][3] = {
+double I[3][3] = {
     {0, 0, 0},
     {0, 0, 0},
     {0, 0, 0},
