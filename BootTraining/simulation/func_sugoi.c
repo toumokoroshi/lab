@@ -3,17 +3,17 @@
 #include "header_tuyoi.h"
 
 //calculate the products of scalar by vector
-void product_vec(double t, int size, double *vector_input,double *vector_output){
+void product_vec(double t, int size, double *vector_input, double *vector_result){
     for (int i = 0; i < size; i++){
-        vector_output[i] = vector_input[i] * t;
+        vector_result[i] = vector_input[i] * t;
     }
 }
 
 //calculate the products of scalar by matrix
-void product_mat(double t, int rows,int cols , double matrix[rows][cols], double result[rows][cols]){   
+void product_mat(double t, int rows, int cols, double matrix_input[rows][cols], matrix_result[rows][cols]){   
     for ( int i = 0; i < rows; i++){
         for ( int j = 0; j < cols; j++){
-           result[i][j] = matrix[i][j]*t; 
+           matrix_result[i][j] = matrix_input[i][j] * t; 
         }
     }
 }
@@ -154,7 +154,7 @@ void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_d
         } 
     }
     //calculate Iw×w +T
-    buff2[0] = buff1[1]*omega[2] - buff1[2]*omega[1]+T[0];
+    buff2[0] = buff1[1]*omega[2] - buff1[2]*omega[1] + T[0];
     buff2[1] = buff1[2]*omega[0] - buff1[0]*omega[2] + T[1];
     buff2[2] = buff1[0]*omega[1] - buff1[1]*omega[0] + T[2];
 
@@ -162,13 +162,13 @@ void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_d
     {
         for (int j = 0; j < count; j++)
         {
-            omega_diff[i] += I[i][j]*buff2[j];
+            omega_diff[i] += I_inv[i][j]*buff2[j];
         }
     }
     
 }
 
-/// calcualte kinematics and return dq/dt
+//kinematics
 void kinematics(double *q, double (*OMEGA)[4], double *q_diff){
     int count=4;
     for ( int i = 0; i < count; i++)
@@ -180,6 +180,57 @@ void kinematics(double *q, double (*OMEGA)[4], double *q_diff){
         } 
         q_diff[i] *= 0.5;
     }
+}
+
+//runge dayo 
+void rk4(double DT, double *omega, double (*I)[3], double (*I_inv)[3], double *T, double *q){
+    double k1w[3], k2w[3], k3w[3], k4w[3];
+    double k1q[4], k2q[4], k3q[4], k4q[4];
+    double buff3[3] = {0};
+    double buff4[4] = {0};
+    double OMEGA[4] = {0};
+
+    //k1
+    dinamics(omega, I, I_inv, k1w, T);
+
+    set_OMEGA(omega,OMEGA);     /*OMEGAってどんな感じで更新するっけ*/
+    kinematics(q,OMEGA,k1q);
+    
+    //k2
+    product_vec(DT/2,3,k1w,buff3);
+    sum_matrix(3,1,omega,buff3,buff3);
+    dinamics(buff3, I, I_inv, k2w, T);
+
+    product_vec(DT/2,4,k1q,buff4);
+    set_OMEGA(buff3,OMEGA);     /*OMEGAってどんな感じで更新するっけ*/
+    sum_matrix(4,1,q,buff4,buff4);
+    kinematics(buff4,OMEGA,k2q);
+
+    //k3
+    product_vec(DT/2,3,k2w,buff3);
+    sum_matrix(3,1,omega,buff3,buff3);
+    dinamics(buff3, I, I_inv, k3w, T);
+
+    product_vec(DT/2,4,k2q,buff4);
+    set_OMEGA(buff3,OMEGA);     /*OMEGAってどんな感じで更新するっけ*/
+    sum_matrix(4,1,q,buff4,buff4);
+    kinematics(buff4,OMEGA,k3q);
+
+    //k4
+    product_vec(DT,3,k3w,buff3);
+    sum_matrix(3,1,omega,buff3,buff3);
+    dinamics(buff3, I, I_inv, k4w, T);
+
+    product_vec(DT,4,k3q,buff4);
+    set_OMEGA(buff3,OMEGA);     /*OMEGAってどんな感じで更新するっけ*/
+    sum_matrix(4,1,q,buff4,buff4);
+    kinematics(buff4,OMEGA,k4q);
+    
+    for (int i = 0; i < 4; i++)
+    {
+        omega[i] += DT * ( k1w[i] + 2.0 * k2w[i] + 2.0 * k3w[i] + k4w[i] +) / 6.0;
+        q[i] += DT * ( k1q[i] +  2.0 * k2q[i] + 2.0 * k3q[i] + k4q[i]) / 6.0;
+    }  
 }
 
 
