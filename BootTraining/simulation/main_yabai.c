@@ -33,12 +33,19 @@ void main(){
 
     for (double t = t_min; t <= t_max; t += dt)
     {
+        printf("%ld ", t);
+
         rk4( omega, I, I_inv, T, q);
-        for (int i = 0; i < count; i++)
-        {
-            /* omega, q, t を構造体にしてまとめてそれを出力すればいいんじゃね */
+
+        for (int i = 0; i < 3; i++){
+            printf("%ld ",omega[i]);
+        }
+        for (int i = 0; i < 4; i++){
+            printf("%ld ", q[i]);
         }
         
+        printf("\n");
     }
 }
+
 

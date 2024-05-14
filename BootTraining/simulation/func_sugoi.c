@@ -10,7 +10,7 @@ void product_vec(double t, int size, double *vector_input, double *vector_result
 }
 
 //calculate the products of scalar by matrix
-void product_mat(double t, int rows, int cols, double matrix_input[rows][cols], matrix_result[rows][cols]){   
+void product_mat(double t, int rows, int cols, double matrix_input[rows][cols], double matrix_result[rows][cols]){   
     for ( int i = 0; i < rows; i++){
         for ( int j = 0; j < cols; j++){
            matrix_result[i][j] = matrix_input[i][j] * t; 
@@ -233,4 +233,24 @@ void rk4(double DT, double *omega, double (*I)[3], double (*I_inv)[3], double *T
     }  
 }
 
+// calculate banemasu
+void banemasu(double DT,double x, double v, double k, double m)
+{
+    double k1[4], k2[4];
+
+    k1[0] = v;
+    k2[0] = -k/m*x;
+
+    k1[1] = v + DT*k1[0]/2;
+    k2[1] = -k/m*(v + DT * k2[0]/2);
+
+    k1[2] = v + DT*k1[1]/2;
+    k2[2] = -k/m*(v + DT * k2[1]/2);
+
+    k1[3] = v + DT*k1[2];
+    k2[3] = -k/m*(v + DT * k2[2]);
+
+    x += DT*(k1[0] + 2*k1[1] + 2*k1[2] + k1[3])/6;
+    v += DT*(k2[0] + 2*k2[1] + 2*k2[2] + k2[3])/6;
+}
 
