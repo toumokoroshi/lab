@@ -20,7 +20,7 @@ void loop(){
     
     // データを配列に格納した後、各データを表示
     for (int i = 0; i < dataCount; i++) {
-      Serial.println(dataArray[i]);
+      Serial.println(dataArray[i] + "\n");
     }
   }
 
