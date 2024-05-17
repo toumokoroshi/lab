@@ -3,5 +3,5 @@
     "board": "esp32:esp32:esp32",
     "sketch": "BootTraining\\uryoukei\\test\\foo\\foo.ino",
     "output": "C:\\lab\\BootTraining\\ArduinoOutput",
-    "port": "COM1"
+    "port": "COM7"
 }
