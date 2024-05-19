@@ -33,3 +33,56 @@ void loop() {
   lcd.print(millis()/1000);
 }
 
+void displayLoadingDots() {
+  static int i = 11; // カーソル位置を11から開始
+  
+  lcd.noCursor();
+  lcd.backlight();
+  
+  lcd.setCursor(0, 0);
+  lcd.print("Please wait");
+  
+  lcd.setCursor(i, 0);
+  delay(300);
+  lcd.print(".");
+  delay(300);
+  i++;
+  
+  if (i == 14) {
+    i = 11;
+    lcd.setCursor(11, 0);
+    lcd.print("   ");
+    delay(300);
+  }
+}
+
+void displayingandFadingout(char charcter){
+    char ch1[]= charcter;
+    int char_count=0;
+    lcd.noCursor();
+    delay(1000);
+    lcd.backlight();
+    while(ch1[char_count]){
+      lcd.setCursor(char_count,0);
+      lcd.print(ch1[char_count]);
+      delay(100);
+      char_count++;
+    }  
+    delay(1000);
+
+    int i=0;
+    while(i<char_count){
+      lcd.setCursor(i,0);
+      lcd.print(" ");
+      delay(100);
+      i++;    
+    }
+    lcd.clear();   
+}
+
+void displayWeatherData(char *str){
+	
+}
+
+void displayDebaggData(){}
+

@@ -1,3 +1,5 @@
+#include <HardwareSerial.h>
+
 #define LoRa_Rst 9 // リセットピンをアサイン！！！！！！！！！！！！！！！
 // own(Master Unit) channel number
 #define CH "1"
@@ -6,7 +8,7 @@
 // spreading factor
 #define SF "7"
 // PANID : the PAN network address in which the node will participate. The devices to be paired must have the same ID
-#define PANID "0000"
+#define PANID "0001"
 // OWNID : the network address of the own(Master Unit) node
 #define OWNID "0000"
 // the network address of the destination(Slave Unit) node
@@ -15,9 +17,13 @@
 const int maxArraySize=50;
 String dataArray[maxArraySize]; 
 
+// UART2を初期化
+HardwareSerial Serial2(2);
+
 void setup(){
-  // opens serial port for uart with lora
+  // opens serial port for uart with hostPC
   Serial.begin(115200);
+  // opens serial port for uart with lora
   Serial2.begin(115200);
 
   init_lora();
@@ -25,16 +31,23 @@ void setup(){
 }
 
 void loop(){
-  if (Serial2.available() > 0) {
-    String receivedData = Serial.readStringUntil('\n'); // read until CRCF
-    int dataCount = splitData(receivedData, dataArray, maxArraySize);
-    
-    // データを配列に格納した後、各データを表示
-    for (int i = 0; i < dataCount; i++) {
-      Serial.println(dataArray[i] + "\n");
+    String receivedData = "";
+    while (Serial2.available())
+    {
+        char buff = Serial2.read();
+        receivedData += buff;
     }
-  }
-
+    if (receivedData.length() > 0){
+        int CRLFindex = receivedData.indexOf("\\");
+        receivedData.remove(CRLFindex);
+        int dataCount = splitData(receivedData, dataArray, maxArraySize);
+        
+        // データを配列に格納した後、各データを表示
+        for (int i = 0; i < dataCount; i++) {
+            Serial.println(dataArray[i] + "\n");
+        }
+    }
+  delay(1000);
 }
 
 // Function to initialize lora
@@ -66,13 +79,19 @@ void init_lora(){
   //   }
   //   delay(10);
 
-  while (Serial.available()>0) {
-      char c = Serial.read();
-      if (response.endsWith("\r\n")) {
+  while (true)
+  {
+    String responce = "";
+    while (Serial.available()>0) {
+        char c = Serial.read();
+        responce += c;
+        if (response.endsWith("\r\n")) {
         break;
+        }
     }
+    delay(50);
   }
-  delay(10);
+
   
   // Select the processor mode of ES920LR
   Serial.write("processor\r\n");
@@ -120,9 +139,9 @@ bool waitForOK() {
 // void waitForOK() {
   String response = "";
   while (true) {
-    if (Serial.available()) 
+    if (Serial2.available()) 
     {
-      char c = Serial.read();
+      char c = Serial2.read();
       response += c;
       if (response.endsWith("OK\r\n")) 
       {

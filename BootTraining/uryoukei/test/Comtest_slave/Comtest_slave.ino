@@ -1,4 +1,6 @@
-#define LoRa_Rst 9 // リセットピンをアサイン！！！！！！！！！！！！！！！
+#include <HardwareSerial.h>
+
+#define LoRa_Rst 4 // リセットピンをアサイン！！！！！！！！！！！！！！！
 // own(Master Unit) channel number
 #define CH "1"
 // bandwidth, 4 means 125MHz
@@ -6,18 +8,22 @@
 // spreading factor
 #define SF "7"
 // PANID : the PAN network address in which the node will participate. The devices to be paired must have the same ID
-#define PANID "0000"
-// OWNID : the network address of the own(Master Unit) node
-#define OWNID "0000"
-// the network address of the destination(Slave Unit) node
-#define DSID "0001" 
+#define PANID "0001"
+// OWNID : the network address of the own(Slave Unit) node
+#define OWNID "0001"
+// the network address of the destination(Master Unit) node
+#define DSID "0000" 
 
 void setup(){
-  // opens serial port for uart with lora
+  // opens serial port for uart with hostPC
   Serial.begin(115200);
+  // opens serial port for uart with lora
+  Serial2.begin(115200);
 }
 
 void loop(){
+    Serial2.print("1,23,45.6,7.89,123.4,5.67,1,8901,+12.3,12.3\r\n")
+    delay(15000);
 }
 
 // Function to initialize lora
@@ -48,11 +54,24 @@ void init_lora(){
   //   break;
   //   }
   //   delay(10);
-
+  while (true)
+  {
+    String responce = "";
+    while (Serial.available()>0) {
+        char c = Serial.read();
+        responce += c;
+        if (response.endsWith("\r\n")) {
+        break;
+        }
+    }
+    delay(50);
+  }
+  
+  
   while (Serial.available()>0) {
       char c = Serial.read();
       if (response.endsWith("\r\n")) {
-        break;
+      break;
     }
   }
   delay(10);

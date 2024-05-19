@@ -1,46 +1,40 @@
-const int maxArraySize = 10; // 配列の最大サイズを定義
-String dataArray[maxArraySize]; // データを格納する配列
+void setup() {
+  // ハードウェアシリアル通信を開始
+  Serial.begin(9600);
+  Serial2.begin(9600);
+  while (!Serial) {
+    ; // シリアルポートが接続されるまで待つ
+  }
+  Serial.println("Hardware Serial Initialized");
 
-void setup(){
-    Serial.begin(115200);
-    Serial.println("hello world");
-    delay(500);
 }
 
-void loop(){
-    String receivedData = "";
-    while (Serial.available())
+void loop() {
+    String sendingdata = "";
+    String receiveddata = "";
+  // pcからのデータをloraに送信
+    while (Serial.available()) {
+        char c = Serial.read();
+        sendingdata += c;
+    }
+
+    if (sendingdata.length())
     {
-        char buff = Serial.read();
-        receivedData += buff;
+        Serial2.print(sendingdata + "\r\n");
     }
-    int CRLFindex = receivedData.indexOf("\\");
-    receivedData.remove(CRLFindex);
-    int dataCount = splitData(receivedData, dataArray, maxArraySize);
     
-    // データを配列に格納した後、各データを表示
-    for (int i = 0; i < dataCount; i++) {
-      Serial.println(dataArray[i] + "\n");
+    delay(1000);
+
+    // ソ送信
+    while (Serial2.available()) {
+        char c = Serial2.read();
+        receiveddata += c;
     }
-  }
 
-// Function to divide data by comma and store them in an array
-int splitData(String data, String *dataArray, int maxArraySize)
-{
-  int dataCount = 0;
-  int startIndex = 0;
-  int endIndex = data.indexOf(',');
-
-  while (endIndex != -1 && dataCount < maxArraySize)
-  {
-    dataArray[dataCount++] = data.substring(startIndex, endIndex);
-    startIndex = endIndex + 1;
-    endIndex = data.indexOf(',', startIndex);
-  }
-
-  if (dataCount < maxArraySize)
-  {
-    dataArray[dataCount++] = data.substring(startIndex);
-  }
-  return dataCount;
+    if (receiveddata.length())
+    {
+        Serial2.print(receiveddata + "\r\n");
+    }
+    delay(1000);
 }
+

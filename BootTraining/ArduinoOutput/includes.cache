@@ -1,0 +1,17 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\cores\\esp32"
+  },
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\variants\\esp32"
+  },
+  {
+    "Sourcefile": "C:\\lab\\BootTraining\\ArduinoOutput\\sketch\\foo.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
