@@ -99,10 +99,13 @@ void displayingandFadingout(char charcter)
 	lcd.clear();
 }
 
-void displayWeatherData(char *str)
+void displayData(char *str, bool datatype)
 {
+	// display weather data: rainfall, atmospheric pressure, humidity, temperature
+	if (datatype==1)
+	{
+		
+	}
+	
 }
 
-void displayDebaggData()
-{
-}
