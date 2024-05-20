@@ -18,11 +18,13 @@ void showLocalTime()
   static const char *wd[7] = { "日", "月", "火", "水", "木", "金", "土" };
   unsigned long m;
 
-  // timeとlocaltimeを使用して現在時刻取得
   time_t t;
   struct tm *tm;
   m = millis();
+  //time() : posix時間からの経過時間を秒で返す
   t = time(NULL);
+  //localtime() : time()で取得した時間をjst-9基準に変換、構造体の各要素が日付、年などの値を持つ
+  //tim()はposix時間からの経過時間を返すため年の情報は+1900する必要
   tm = localtime(&t);
   sprintf(str, "[time localtime] %04d/%02d/%02d(%s) %02d:%02d:%02d : %d (ms)", tm->tm_year+1900, tm->tm_mon+1, tm->tm_mday, wd[tm->tm_wday], tm->tm_hour, tm->tm_min, tm->tm_sec, millis()-m);
   Serial.println(str);

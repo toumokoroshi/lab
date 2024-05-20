@@ -1,13 +1,14 @@
 #include <Arduino.h>
+
 #include <LiquidCrystal.h>
 
-// X,XX,XYY,XYY,XXXY,XXY,X,XXXX,+XXY,XXY\r\n
+// X,XX,XYY,XYY,XXXY,XXXY,X,XXXX,+XXY,XXY\r\n
 // 送信カウンタ		    1	X	    -	    1
 // アノマリID		   2	XX	    -	    2
 // 太陽光パネル電圧値	3	 X.YY	 V	     3
 // 二次電池電圧値		4	 X.YY	 V	    3
 // 電流値			   5	XXX.Y	mA	    4
-// 雨量				   6	XX.Y	mm	    3
+
 // 雨検知			   7	X		(0|1)	1
 // 気圧				   8	XXXX	hPa	    4
 // 気温				   9	+XX.Y	℃	   4
@@ -31,18 +32,32 @@
 #define EN 9
 #define RS 12
 
+struct sampleData
+{
+    short counter = 1;
+    short anomaryID = 12;    /* アノマリID */
+    short SPVoltage = 345;   /* 太陽光パネル電圧値 */
+    short battVoltage; /* 二次電池電圧 */
+    short current;     /* 電流 */
+    short rainfall;    /* 雨量 */
+    short rain;        /* 雨検知 */
+    short pressure;    /* 気圧 */
+    char temp[5];     /* 気温 */
+    short humidity;    /* 湿度 */
+} ;
+
 LiquidCrystal lcd(RS, EN, DB4, DB5, DB6, DB7);
 
 void setup()
 {
 	lcd.begin(16, 2);
-	lcd.print("hello, world!");
+	lcd.print("justice!!!!!");
 }
 
 void loop()
 {
-	// set the cursor to column 0, line 1
-	lcd.setCursor(0, 1);
+	// set the cursor to column 0, row 0
+	lcd.setCursor(0, 0);
 	// print the number of seconds since reset:
 	lcd.print(millis() / 1000);
 }
@@ -102,10 +117,7 @@ void displayingandFadingout(char charcter)
 void displayData(char *str, bool datatype)
 {
 	// display weather data: rainfall, atmospheric pressure, humidity, temperature
-	if (datatype==1)
-	{
-		
-	}
+	
 	
 }
 
