@@ -55,3 +55,9 @@ int splitData(String data, String *dataArray, int maxArraySize)
   }
   return dataCount;
 }
+
+// Function to divide data by comma and store them in an data
+int splitData(char* data[40], char *dataArray, int maxArraySize)
+{
+	
+}
