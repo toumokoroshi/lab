@@ -1,3 +1,4 @@
+#line 1 "C:\\lab\\BootTraining\\uryoukei\\test\\LCDtest\\LCDtest.ino"
 #include <Arduino.h>
 
 #include <LiquidCrystal.h>
@@ -29,6 +30,11 @@
 const int rs = 15, en = 14, d4 = 27, d5 = 26, d6 = 25, d7 = 33;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
+#line 32 "C:\\lab\\BootTraining\\uryoukei\\test\\LCDtest\\LCDtest.ino"
+void setup();
+#line 39 "C:\\lab\\BootTraining\\uryoukei\\test\\LCDtest\\LCDtest.ino"
+void loop();
+#line 32 "C:\\lab\\BootTraining\\uryoukei\\test\\LCDtest\\LCDtest.ino"
 void setup()
 {
 	lcd.begin(16, 2);
@@ -102,4 +108,5 @@ void loop()
 	
 	
 // }
+
 

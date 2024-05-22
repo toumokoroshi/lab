@@ -1,5 +1,5 @@
-C:\lab\BootTraining\ArduinoOutput\sketch\foo.ino.cpp.o: \
- C:\lab\BootTraining\ArduinoOutput\sketch\foo.ino.cpp \
+C:\lab\BootTraining\ArduinoOutput\sketch\LCDtest.ino.cpp.o: \
+ C:\lab\BootTraining\ArduinoOutput\sketch\LCDtest.ino.cpp \
  C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16\cores\esp32/Arduino.h \
  C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16\cores\esp32/esp_arduino_version.h \
  C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16/tools/sdk/esp32/include/freertos/include/freertos/FreeRTOS.h \
@@ -133,4 +133,6 @@ C:\lab\BootTraining\ArduinoOutput\sketch\foo.ino.cpp.o: \
  C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16/tools/sdk/esp32/include/spi_flash/include/esp_spi_flash_counters.h \
  C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16/tools/sdk/esp32/include/esp_hw_support/include/soc/esp32/spiram.h \
  C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16\cores\esp32/io_pin_remap.h \
- C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16\cores\esp32/Arduino.h
+ C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16\cores\esp32/Arduino.h \
+ C:\Users\lab_hyuga\Documents\Arduino\libraries\LiquidCrystal\src/LiquidCrystal.h \
+ C:\Users\lab_hyuga\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.16\cores\esp32/Print.h

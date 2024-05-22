@@ -1,9 +1,10 @@
 #include <WiFi.h>
 #include <time.h>
+#include "sntp.h"
 #include <sys/time.h>
 
-const char* ssid = "your_SSID";
-const char* password = "your_PASSWORD";
+const char* ssid = "Buffalo-A-61FE";
+const char* password = "8c344ur8vs55v";
 
 const char* ntpServer1 = "ntp.nict.jp";
 const char* ntpServer2 = "time.google.com";
