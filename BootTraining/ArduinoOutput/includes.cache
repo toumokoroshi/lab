@@ -11,6 +11,71 @@
   },
   {
     "Sourcefile": "C:\\lab\\BootTraining\\ArduinoOutput\\sketch\\foo.ino.cpp",
+    "Include": "WiFi.h",
+    "Includepath": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src"
+  },
+  {
+    "Sourcefile": "C:\\lab\\BootTraining\\ArduinoOutput\\sketch\\foo.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\lab\\BootTraining\\ArduinoOutput\\sketch\\LCDtest.ino.cpp",
+    "Include": "LiquidCrystal.h",
+    "Includepath": "C:\\Users\\lab_hyuga\\Documents\\Arduino\\libraries\\LiquidCrystal\\src"
+  },
+  {
+    "Sourcefile": "C:\\lab\\BootTraining\\ArduinoOutput\\sketch\\LCDtest.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFi.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiAP.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiClient.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiGeneric.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiMulti.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiSTA.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiScan.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiServer.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.16\\libraries\\WiFi\\src\\WiFiUdp.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\lab_hyuga\\Documents\\Arduino\\libraries\\LiquidCrystal\\src\\LiquidCrystal.cpp",
     "Include": "",
     "Includepath": null
   }
