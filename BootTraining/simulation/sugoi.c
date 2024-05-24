@@ -1,8 +1,7 @@
 #include <stdio.h>
 
-// バネマスモデルのパラメータ
-#define M 1.0  // 質量
-#define K 1.0  // ばね定数
+#define K 5.0
+#define M 2.0
 
 // 微分方程式の定義
 void derivatives(double x, double v, double *dxdt, double *dvdt) {
@@ -11,7 +10,7 @@ void derivatives(double x, double v, double *dxdt, double *dvdt) {
 }
 
 // 4次のルンゲクッタ法
-void runge_kutta_4(double *x, double *v, double dt) {
+void banemasu(double *x, double *v, double t, double dt) {
     double k1_x, k1_v;
     double k2_x, k2_v;
     double k3_x, k3_v;
@@ -33,35 +32,37 @@ void runge_kutta_4(double *x, double *v, double dt) {
     *v += dt / 6.0 * (k1_v + 2.0 * k2_v + 2.0 * k3_v + k4_v);
 }
 
-int main() {
-    // 初期条件
-    double x = 1.0;  // 初期変位
-    double v = 0.0;  // 初期速度
-    double t = 0.0;  // 開始時刻
-    double dt = 0.01;  // タイムステップ
-    double t_max = 10.0;  // 終了時刻
+int main(){
+    double k,m,t, x, v, dt, t_max;
 
-    // 出力用ファイル
-    FILE *fp = fopen("output.csv", "w");
-    if (fp == NULL) {
-        fprintf(stderr, "ファイルが開けませんでした。\n");
+    x = 1.0;
+    v = 0.0;
+    t = 0.0;
+    dt = 0.01;
+    t_max = 10;
+
+    FILE *fp;
+    fp = fopen("banemasu_runge.csv", "w");
+    if(fp==NULL){
+        printf("Can't open file\n");
         return 1;
     }
 
-    // 時刻歴解析
+    fprintf(fp, "time,x,v\n");
+
+        // 時刻歴解析
     while (t <= t_max) {
         // 結果をファイルに出力
         fprintf(fp, "%f,%f,%f\n", t, x, v);
 
         // ルンゲクッタ法で次のステップを計算
-        runge_kutta_4(&x, &v, dt);
+        banemasu(&x, &v, t, dt);
 
         // 時刻を更新
         t += dt;
     }
-
-    // ファイルを閉じる
+    
     fclose(fp);
-
-    return 0;
 }
+
+// calculate banemasu

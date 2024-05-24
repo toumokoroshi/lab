@@ -1,8 +1,9 @@
+#include "header_tuyoi.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "header_tuyoi.h"
 
-void main(){
+
+int main(){
     double omega[3]={0};
     double q[4] ={0};
     double I[3][3] = {
@@ -35,7 +36,7 @@ void main(){
     {
         printf("%ld ", t);
 
-        rk4( omega, I, I_inv, T, q);
+        rk4(dt, omega, I, I_inv, T, q);
 
         for (int i = 0; i < 3; i++){
             printf("%ld ",omega[i]);
@@ -46,6 +47,7 @@ void main(){
         
         printf("\n");
     }
+    return 0;
 }
 
 

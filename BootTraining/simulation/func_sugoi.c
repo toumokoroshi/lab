@@ -117,7 +117,7 @@ void inverse_I(double I[][3], double I_inv[][3]) {
 
 
 //calculate OMEGA for kinematics(in this program quartanion is defined like [lsin msin nsin cos])
-void set_OMEGA(double *omega, double (*OMEGA)[4]){
+void set_OMEGA(double *omega, double OMEGA[][4]){
     int size = 4;
 
     for (int i = 0; i < size; i++)
@@ -140,7 +140,7 @@ void set_OMEGA(double *omega, double (*OMEGA)[4]){
 }
 
 /// calcualte dynamics and return dw/dt
-void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_diff, double *T){
+void dynamics(double *omega, double I[][3], double *I_inv[][3], double *omega_diff, double *T){
     int count = 3;
     double buff1[3]={0};
     double buff2[3]={0};
@@ -169,7 +169,7 @@ void dynamics(double *omega, double (*I)[3], double (*I_inv)[3], double *omega_d
 }
 
 //kinematics
-void kinematics(double *q, double (*OMEGA)[4], double *q_diff){
+void kinematics(double *q, double OMEGA[][4], double *q_diff){
     int count=4;
     for ( int i = 0; i < count; i++)
     {
@@ -183,7 +183,7 @@ void kinematics(double *q, double (*OMEGA)[4], double *q_diff){
 }
 
 //runge dayo 
-void rk4(double DT, double *omega, double (*I)[3], double (*I_inv)[3], double *T, double *q){
+void rk4(double DT, double *omega, double I[][3], double I_inv[][3], double *T, double *q){
     double k1w[3], k2w[3], k3w[3], k4w[3];
     double k1q[4], k2q[4], k3q[4], k4q[4];
     double buff3[3] = {0};
@@ -191,15 +191,15 @@ void rk4(double DT, double *omega, double (*I)[3], double (*I_inv)[3], double *T
     double OMEGA[4] = {0};
 
     //k1
-    dinamics(omega, I, I_inv, k1w, T);
+    dynamics(omega, I, I_inv, k1w, T);
 
-    set_OMEGA(omega,OMEGA);     /*OMEGAってどんな感じで更新するっけ*/
+    set_OMEGA(*omega,OMEGA);     /*OMEGAってどんな感じで更新するっけ*/
     kinematics(q,OMEGA,k1q);
     
     //k2
     product_vec(DT/2,3,k1w,buff3);
-    sum_matrix(3,1,omega,buff3,buff3);
-    dinamics(buff3, I, I_inv, k2w, T);
+    sum_matrix(3,1,*omega,buff3,buff3);
+    dynamics(buff3, I, I_inv, k2w, T);
 
     product_vec(DT/2,4,k1q,buff4);
     set_OMEGA(buff3,OMEGA);     /*OMEGAってどんな感じで更新するっけ*/
@@ -234,21 +234,20 @@ void rk4(double DT, double *omega, double (*I)[3], double (*I_inv)[3], double *T
 }
 
 // calculate banemasu
-void banemasu(double DT,double x, double v, double k, double m)
-{
+void banemasu(double DT,double x, double v, double k, double m){
     double k1[4], k2[4];
 
     k1[0] = v;
     k2[0] = -k/m*x;
 
     k1[1] = v + DT*k1[0]/2;
-    k2[1] = -k/m*(v + DT * k2[0]/2);
+    k2[1] = -k/m*(x + DT * k2[0]/2);
 
     k1[2] = v + DT*k1[1]/2;
-    k2[2] = -k/m*(v + DT * k2[1]/2);
+    k2[2] = -k/m*(x + DT * k2[1]/2);
 
     k1[3] = v + DT*k1[2];
-    k2[3] = -k/m*(v + DT * k2[2]);
+    k2[3] = -k/m*(x + DT * k2[2]);
 
     x += DT*(k1[0] + 2*k1[1] + 2*k1[2] + k1[3])/6;
     v += DT*(k2[0] + 2*k2[1] + 2*k2[2] + k2[3])/6;
