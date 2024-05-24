@@ -3,5 +3,6 @@
     "files.associations": {
         "header_tuyoi.h": "c",
         "stdio.h": "c"
-    }
+    },
+    "C_Cpp.intelliSenseEngineFallback": "disabled"
 }

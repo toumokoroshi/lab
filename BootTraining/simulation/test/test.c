@@ -1,74 +1,67 @@
 #include <stdio.h>
-#include <math.h>
-#include "C:\Development\lab\BootTraining\simulation\header_tuyoi.h"
+
+// バネマスモデルのパラメータ
+#define M 1.0  // 質量
+#define K 1.0  // ばね定数
+
+// 微分方程式の定義
+void derivatives(double x, double v, double *dxdt, double *dvdt) {
+    *dxdt = v;
+    *dvdt = -K / M * x;
+}
+
+// 4次のルンゲクッタ法
+void runge_kutta_4(double *x, double *v, double dt) {
+    double k1_x, k1_v;
+    double k2_x, k2_v;
+    double k3_x, k3_v;
+    double k4_x, k4_v;
+    double x_temp, v_temp;
+
+    derivatives(*x, *v, &k1_x, &k1_v);
+    x_temp = *x + 0.5 * dt * k1_x;
+    v_temp = *v + 0.5 * dt * k1_v;
+    derivatives(x_temp, v_temp, &k2_x, &k2_v);
+    x_temp = *x + 0.5 * dt * k2_x;
+    v_temp = *v + 0.5 * dt * k2_v;
+    derivatives(x_temp, v_temp, &k3_x, &k3_v);
+    x_temp = *x + dt * k3_x;
+    v_temp = *v + dt * k3_v;
+    derivatives(x_temp, v_temp, &k4_x, &k4_v);
+
+    *x += dt / 6.0 * (k1_x + 2.0 * k2_x + 2.0 * k3_x + k4_x);
+    *v += dt / 6.0 * (k1_v + 2.0 * k2_v + 2.0 * k3_v + k4_v);
+}
 
 int main() {
-    double sample_vec[3] = {1, 2, 3};
-    double sample_mat1[3][3] = {
-        {1, 2, 3},
-        {4, 5, 6},
-        {7, 8, 9}
-    };
-    double sample_mat2[3][3] = {
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1}
-    };
+    // 初期条件
+    double x = 1.0;  // 初期変位
+    double v = 0.0;  // 初期速度
+    double t = 0.0;  // 開始時刻
+    double dt = 0.01;  // タイムステップ
+    double t_max = 10.0;  // 終了時刻
 
-    double buff1[3] = {0};
-    double buff2[3][3] = {0};
-
-    double scalar = 2.0; // スカラーはdouble型として宣言
-
-
-    product_vec(scalar, 3, sample_vec, buff1);
-
-    printf("product_vecの結果\n");
-    for (int i = 0; i < 3; i++)
-    {
-        printf("%f ", buff1[i]);
-    }
-    printf("\n");
-
-    int row = sizeof(sample_mat1)/sizeof(sample_mat1[0]);
-    int col = sizeof(sample_mat1)/sizeof(sample_mat1[0][0]);
-
-    product_mat(scalar, 3, 3, sample_mat1, buff2);
-
-    printf("product_matの結果\n");
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            printf("%f ", buff2[i][j]);
-        }
-        printf("\n");
+    // 出力用ファイル
+    FILE *fp = fopen("output.csv", "w");
+    if (fp == NULL) {
+        fprintf(stderr, "ファイルが開けませんでした。\n");
+        return 1;
     }
 
-    sum_matrix(row, col, sample_mat1, sample_mat2, buff2);
+    // 時刻歴解析
+    while (t <= t_max) {
+        // 結果をファイルに出力
+        fprintf(fp, "%f,%f,%f\n", t, x, v);
 
-    printf("result of sum_mat\n");
-    for (int i = 0; i < 3; i++)
-    {
-        for (int j = 0; j < 3; j++)
-        {
-            printf("%f ", buff2[i][j]);
-        }
-        printf("\n");
-    }
-    double buff3[4][4] = {0};
+        // ルンゲクッタ法で次のステップを計算
+        runge_kutta_4(&x, &v, dt);
 
-    set_OMEGA(sample_vec,buff3);
-   
-   printf("result of set_OMEGA\n");
-    for (int i = 0; i < 4; i++)
-    {
-        for (int j = 0; j < 4; j++)
-        {
-            printf("%f ", buff3[i][j]);
-        }
-        printf("\n");
+        // 時刻を更新
+        t += dt;
     }
+
+    // ファイルを閉じる
+    fclose(fp);
 
     return 0;
 }
