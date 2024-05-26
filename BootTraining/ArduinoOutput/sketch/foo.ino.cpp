@@ -34,6 +34,11 @@ const char* password = "8c344ur8vs55v";
 
 WiFiServer server(80);
 
+#line 35 "C:\\lab\\BootTraining\\uryoukei\\test\\foo\\foo.ino"
+void setup();
+#line 65 "C:\\lab\\BootTraining\\uryoukei\\test\\foo\\foo.ino"
+void loop();
+#line 35 "C:\\lab\\BootTraining\\uryoukei\\test\\foo\\foo.ino"
 void setup()
 {
     Serial.begin(115200);
