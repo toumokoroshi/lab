@@ -8,7 +8,4 @@
 // 雨が降っていないと判断するための、電圧値連続減少回数
 #define WATER_DETECTOR_RAIN_STOP_COUNTER 20
 
-// 雨検知電圧値[V] -> X.YYY [V]
-float voltage_water_detector = 0.0;
-
-void onDataReceived();
+void isRainingorNot(int *is_raining,float *wd_voltage,float *pre_wd_voltage,int *wd_decrease_counter);
