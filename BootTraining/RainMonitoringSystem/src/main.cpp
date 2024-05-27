@@ -14,18 +14,6 @@
 // humidity						10		XX.Y	%	    3
 //                                                      total : 43digits
 
-// PIN ASIGNMENT
-// TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**TBD**
-//  esp32 lcdmodule
-//  28    14(DB7)
-//      13(DB6)
-//  15    12(DB5)
-//  14    11(DB4)
-//  33      6(E)
-//  27     4(RS)
-//         3(VLC)
-//         2(Vdd)
-//         1(Vss)
 
 /*
            3V3 - |o3V3      GNDo| -
@@ -50,8 +38,6 @@
 */
 
 #include <Arduino.h>
-#include <string.h>
-#include <stdlib.h>
 #include <LiquidCrystal.h>
 
 void formatData(char *input, formedData *dataStruct) {};
@@ -66,14 +52,67 @@ extern const int MISO;
 extern const int MOSI;
 extern const int CS;
 
+byte celcius_degree[8]={
+    B11100,
+    B10100,
+    B11100,
+    B01111,
+    B01000,
+    B01000,
+    B01111,
+};
+
 LiquidCrystal lcd(RS, EN, DB4, DB5, DB6, DB7);
-formattedData formatteddata;
-char *data[43];
+
+// 受信データフォーマット用構造体
+typedef struct
+{
+    short counter;             /*Transmit Counter*/
+    short anomaryID;           /* AnomaryID */
+    float SPVoltage;           /* solar panel voltage value */
+    float battVoltage;         /* battery Voltage Value */
+    float rainDetectorVoltage; /*rain detector Voltage Value*/
+    float current;             /* current value */
+    float rainfall;            /* precipitation */
+    short pressure;            /* atomospheric preassure */
+    float temp;                /* temperature */
+    float humidity;            /* humidity */
+    bool raindetect;           /*detected rain -> 1, no rain -> 0*/
+} formattedData;
+
+formattedData datastruct;
+char data[44];
+
+// 受信データinputをformedDataの形式にフォーマットする
+void formatData(char *input, formedData *dataStruct)
+{
+    // 改行文字を削除
+    input[strcspn(input, "\r\n")] = 0;
+
+    sscanf(input, "%hd,%hd,%f,%f,%f,%f,%f,%hd,%f,%f",
+           &dataStruct->counter,
+           &dataStruct->anomaryID,
+           &dataStruct->SPVoltage,
+           &dataStruct->battVoltage,
+           &dataStruct->rainDetectorVoltage,
+           &dataStruct->current,
+           &dataStruct->rainfall,
+           &dataStruct->pressure,
+           &dataStruct->temp,
+           &dataStruct->humidity);
+    dataStruct->SPVoltage /= 100;
+    dataStruct->battVoltage /= 100;
+    dataStruct->rainDetectorVoltage /= 1000 dataStruct->current /= 10;
+    dataStruct->rainfall /= 10;
+    dataStruct->temp /= 10;
+    dataStruct->humidity /= 10;
+}
 
 void setup()
 {
     lcd.begin(16, 2);
     lcd.print("Initializing...");
+    lcd.createChar(0,celcius_degree);
 
     // starting Serial com with lora
     Serial.begin(BAUDRATE);
@@ -122,70 +161,52 @@ void loop()
     }
 
     int i = 0;
-    while (Serial.available())
-    {
+    while (Serial.available() && i < 43) {
         char buff = Serial.read();
-        data[i] = buff;
+        data[i] += buff;
         i++;
     }
-    formatData(data, &formatteddata);
+    data[i] = '\0'; // null terminator to mark end of string
+    formatData(data, &datastruct);
 
     ////////////////////////////add rainfall volate handling
+    //////////////////////add atomospheric pressure handling
     if (digitalRead(DATASWITCH_PIN) == HIGH)
     {
         lcd.setCursor(0, 0);
         if (raindetect)
         {
+            char buffer[16];
             lcd.print("Rainfall:     mm"); // ５マス分のスペースは降水量の５文字分
             lcd.setCursor(9, 0);
-            lcd.print()
+            snprintf(buffer, sizeof(buffer), "%.1f", datastruct.rainfall);
+            lcd.print(buffer);
         }
         if (!raindetect)
         {
             lcd.print("No rain");
         }
-        lcd.setCursor(0, 1)
+        lcd.setCursor(0, 1);
+        char tempBuffer[8];
+        snprintf(tempBuffer, sizeof(tempBuffer), "%.2f C", datastruct.temp);
+        lcd.print(tempBuffer);
+    }
+
+    if(digitalRead(DATASWITCH_PIN)==LOW)
+    {
+        lcd.setCursor(0, 0);
+        lcd.print("PV/Bat:    /");
+        char buffer[4];
+        //太陽光パネル電圧
+        snprintf(buffer,sizeof(buffer),"%.1f",datastruct.SPVoltage);
+        lcd.setCursor(7,1);
+        lcd.print(buffer);
+        //バッテリ電圧表示
+        snprintf(buffer,sizeof(buffer),"%.1f",datastruct.battVoltage);
+        lcd.setCursor(12,1);
+        lcd.print(buffer);
+        
     }
 }
 
-// 受信データを突っ込む用
-// なんでやねん
-typedef struct
-{
-    short counter;             /*Transmit Counter*/
-    short anomaryID;           /* AnomaryID */
-    float SPVoltage;           /* solar panel voltage value */
-    float battVoltage;         /* battery Voltage Value */
-    float rainDetectorVoltage; /*rain detector Voltage Value*/
-    float current;             /* current value */
-    float rainfall;            /* precipitation */
-    short pressure;            /* atomospheric preassure */
-    float temp;                /* temperature */
-    float humidity;            /* humidity */
-    bool raindetect;           /*detected rain -> 1, no rain -> 0*/
-} formattedData;
-
-// 受信データinputをformedDataの形式にフォーマットする
-void formatData(char *input, formedData *dataStruct)
-{
-    // 改行文字を削除
-    input[strcspn(input, "\r\n")] = 0;
-
-    sscanf(input, "%hd,%hd,%f,%f,%f,%f,%f,%hd,%f,%f",
-           &dataStruct->counter,
-           &dataStruct->anomaryID,
-           &dataStruct->SPVoltage,
-           &dataStruct->battVoltage,
-           &dataStruct->rainDetectorVoltage,
-           &dataStruct->current,
-           &dataStruct->rainfall,
-           &dataStruct->pressure,
-           &dataStruct->temp,
-           &dataStruct->humidity);
-    dataStruct->SPVoltage /= 100;
-    dataStruct->battVoltage /= 100;
-    dataStruct->rainDetectorVoltage /= 1000 dataStruct->current /= 10;
-    dataStruct->rainfall /= 10;
-    dataStruct->temp /= 10;
-    dataStruct->humidity /= 10;
-}
+℃
