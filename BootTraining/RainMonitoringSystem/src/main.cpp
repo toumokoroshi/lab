@@ -1,59 +1,15 @@
-
-// receiving data format : X,XX,XYY,XYY,XXXY,XXXY,X,XXXX,ZXXY,XXY\r\n
-
-// label            			index	format  unit 	digits(DEC)
-// Transmit Counter				1		X	    -	    1
-// AnomaryID					2		XX	    -	    2
-// solar panel voltage value	3		X.YY	V	    3
-// battery Voltage Value		4		X.YY	V	    3
-// water detector voltage value	5		X.YYY	V       4
-// current value				6		XXX.Y	mA	    4
-// precipitation				7		XXX.Y   mm      4
-// atomospheric preassure		8		XXXX	hPa	    4
-// temperature					9		ZXX.Y	℃	   4  Z = 1の時プラス
-// humidity						10		XX.Y	%	    3
-//                                                      total : 43digits
-
-
-/*
-           3V3 - |o3V3      GNDo| -
-               - |oEN        23o| - MOSI
-               - |oVP        22o| -
-               - |oVN        TXo| - TX
-               - |o34        RXo| - RX
-               - |o35        21o| -
-               - |o32       GNDo| -
-            EN - |o33        19o| - MISO
-               - |o25        18o| - CLK
-               - |o26         5o| -
-            RS - |o27        17o| - DB7
-           DB4 - |o14        16o| - DB6
-           LED - |o12         4o| - CS
-           GND - |oGND        0o| -
-    DATASWITCH - |o13         2o| -
-               - |oD2        15o| - DB5
-               - |oD3        D1o| -
-               - |oCMD       D0o| -
-               - |o5V       CLKo| -
-*/
-
 #include <Arduino.h>
-#include <stdlib.h>
-#include <string.h>
 #include <SD.h>
 #include <LiquidCrystal.h>
+#include <setup.hpp>
 #include <raindetecter_handler.hpp>
 #include <SDmodule.hpp>
-
-const int DB7 = 28, DB6 = 27, DB5 = 23, DB4 = 13, EN = 9, RS = 12; // for LCDmodule                                 // serial(default) -lora, serial1 -SD
-const int LED_PIN = 12;
-const int DATASWITCH_PIN = 13;
-const int BAUDRATE = 115200; // for serial communication
 
 float pre_wd_voltage = 0.0;//previous value of water detector volage value
 int wd_decrease_counter = 0;
 
-byte celcius_degree[8]={
+LiquidCrystal lcd(RS, EN, DB4, DB5, DB6, DB7);
+byte celsius_degree[8]={   // bit data for celsius degree character
     B11100,
     B10100,
     B11100,
@@ -63,70 +19,52 @@ byte celcius_degree[8]={
     B01111,
 };
 
-LiquidCrystal lcd(RS, EN, DB4, DB5, DB6, DB7);
+formattedData datastruct;  
+char receieved_data[44];
 
-// 受信データフォーマット用構造体
-typedef struct
-{
-    short counter;                  /*Transmit Counter*/
-    short anomaryID;                /* AnomaryID */
-    float PV_Voltage;               /* solar panel voltage value */
-    float batt_Voltage;             /* battery Voltage Value */
-    float waterdetector_Voltage;    /* water detector Voltage Value*/
-    float current;                  /* current value */
-    float rainfall;                 /* precipitation */
-    short pressure;                 /* atomospheric preassure */
-    float temp;                     /* temperature */
-    float humidity;                 /* humidity */
-    bool is_raining;                /* raining -> 1, no rain -> 0*/
-} formattedData;
+bool displayData_weather = true; // true: display weather data, false: display system data
 
-formattedData datastruct{0, 0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0.0, 0.0,0};
-char data[44];
+// Interrupt flag
+volatile bool dataReceived = false;
 
-// 受信データinputをformedDataの形式にフォーマットする
-void formatData(char *input, formattedData *dataStruct)
-{
-    // 改行文字を削除
-    input[strcspn(input, "\r\n")] = 0;
+// Interrupt handler for serial data reception
+void IRAM_ATTR serialEvent1() {
+    strcpy(receieved_data,"");
+    int i = 0;
+    while (Serial.available()) {
+        char buff = Serial.read();
+        receieved_data[i] = buff;
+        i++;
+        if (buff == '\n') {
+            dataReceived = true;
+        } 
+    }
+}
 
-    sscanf(input, "%hd,%hd,%f,%f,%f,%f,%f,%hd,%f,%f",
-           &dataStruct->counter,
-           &dataStruct->anomaryID,
-           &dataStruct->PV_Voltage,
-           &dataStruct->batt_Voltage,
-           &dataStruct->waterdetector_Voltage,
-           &dataStruct->current,
-           &dataStruct->rainfall,
-           &dataStruct->pressure,
-           &dataStruct->temp,
-           &dataStruct->humidity);
-    dataStruct->PV_Voltage /= 100;
-    dataStruct->batt_Voltage /= 100;
-    dataStruct->waterdetector_Voltage /= 1000;
-    dataStruct->current /= 10;
-    dataStruct->rainfall /= 10;
-    dataStruct->temp = dataStruct->temp>=1000? dataStruct->temp/10-100 :(dataStruct->temp/10) *-1;
-    dataStruct->humidity /= 10;
+// Function to check the state of the switch
+void checkSwitch() {
+    static bool lastSwitchState = HIGH;
+    bool currentSwitchState = digitalRead(SWITCH_PIN);
+  if (lastSwitchState  ^ currentSwitchState ) {
+    displayData_weather = currentSwitchState;
+    delay(200); // Debounce delay
+  }
 }
 
 void setup()
 {
     lcd.begin(16, 2);
     lcd.print("Initializing...");
-    lcd.createChar(0,celcius_degree);
+    lcd.createChar(0,celsius_degree);
 
     // starting Serial com with lora
     Serial.begin(BAUDRATE);
-    Serial2.begin(BAUDRATE);
-    //////////////////////////////////////////////////add error handring
-    while (!Serial)
-    {
-        delay(10);
-    }
+    while (!Serial);
+ 
+    // Set pin mode for the switch
+    pinMode(SWITCH_PIN, INPUT_PULLUP);
     
     // starting com with and initializing SDmod
-    //////////////////////////////////////////////////add error handring
     if(!SD.begin()){
         lcd.print("Card Mount Failed");
         delay(2000);
@@ -136,75 +74,112 @@ void setup()
     lcd.clear();
     delay(50);
     lcd.print("Get Ready!");
-    delay(2000);
-    lcd.clear();
+    delay(1000);
+    lcd.print("Waiting for data");
+
+    // Set up interrupt
+    attachInterrupt(digitalPinToInterrupt(RX), serialEvent1, CHANGE);
 }
 
 void loop()
 {
-    while (!Serial.available())
-    {
-        delay(10);
-    }
+    // Check if an interrupt has occurred
+    noInterrupts(); // Disable interrupts while checking and resetting the flag
+    bool received = dataReceived;
+    dataReceived = false;
+    interrupts(); // Re-enable interrupts
 
-    int i = 0;
-    while (Serial.available() && i < 43) {
-        char buff = Serial.read();
-        data[i] = buff;
-        i++;
-    }
-    data[i] = '\0'; // null terminator to mark end of string
-    writeFile(SD, "/data.txt", data);
 
-    formatData(data, &datastruct);
-    //judge rainning or not from water detector voltage value and its change
-    isRainingorNot(&datastruct.is_raining,&datastruct.waterdetector_Voltage,&pre_wd_voltage,&wd_decrease_counter);
     //////////////////////add atomospheric pressure handling
-    if (digitalRead(DATASWITCH_PIN) == HIGH)
-    {
+
+    if (received) {
+        writeFile(SD, "/data.txt", receieved_data); 
+        formatData(receieved_data, &datastruct);
+        
+        //judge rainning or not from water detector voltage value and its change
+        isRainingorNot(&datastruct.is_raining,&datastruct.waterdetector_Voltage,&pre_wd_voltage,&wd_decrease_counter);
+
+        //conbert each data to characters to display
+        char rainfallBuff[8];
+        char tempBuff[8];
+        char preassureBuff[8];
+        char humidityBuff[8];
+        snprintf(rainfallBuff, sizeof(rainfallBuff), "%4.1f", datastruct.rainfall);
+        snprintf(tempBuff, sizeof(tempBuff), "%4.1f", datastruct.temp);
+        snprintf(preassureBuff, sizeof(preassureBuff), "%d", datastruct.pressure);
+        snprintf(humidityBuff, sizeof(humidityBuff), "%3.1f", datastruct.humidity);
+
+        char counterBuff[8];
+        char anomaryIDBuff[8];
+        char pvBuff[8];
+        char battBuff[8];
+        char currentBuff[8];
+        snprintf(counterBuff, sizeof(counterBuff), "%d", datastruct.counter);
+        snprintf(anomaryIDBuff, sizeof(anomaryIDBuff), "%d", datastruct.anomaryID);
+        snprintf(pvBuff, sizeof(pvBuff), "%4d", datastruct.PV_Voltage);
+        snprintf(battBuff, sizeof(battBuff), "%3.1f", datastruct.batt_Voltage);
+        snprintf(currentBuff, sizeof(currentBuff), "%4.1f", datastruct.current);
+        
+        // Clear the LCD and display new data
+        lcd.clear();
         lcd.setCursor(0, 0);
-        if (datastruct.is_raining)
-        {
-            char buffer[16];
-            lcd.print("Rainfall:     mm"); // ５マス分のスペースは降水量の５文字分
-            lcd.setCursor(9, 0);
-            snprintf(buffer, sizeof(buffer), "%.1f", datastruct.rainfall);
-            lcd.print(buffer);
-        }
-        if (!datastruct.is_raining)
-        {
-            lcd.print("No rain");
-        }
+        static bool datablink = 0;
+        if (displayData_weather) {
+            if (datastruct.is_raining)
+            {
+                lcd.print("Rainfall:     mm"); // ５マス分のスペースは降水量の５文字分
+                lcd.setCursor(9, 0);
+                lcd.print(rainfallBuff);
+            } else {
+                lcd.print("No rain");
+            }
 
-        char tempBuffer[8];
-        snprintf(tempBuffer, sizeof(tempBuffer), "%.1f", datastruct.temp);
-        char preassureBuffer[8];
-        snprintf(preassureBuffer, sizeof(tempBuffer), "%d", datastruct.pressure);
+            if (datablink)
+            {
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(tempBuff);
+                lcd.setCursor(4, 1);
+                lcd.write(byte(0));
+                lcd.setCursor(8, 1);
+                lcd.print(humidityBuff);
+                lcd.setCursor(12, 1);
+                lcd.print("%");
+                delay(2000);
+                datablink = !datablink;
+            } else {
+                lcd.setCursor(0, 1);
+                lcd.print("                ");
+                lcd.setCursor(0, 1);
+                lcd.print(preassureBuff);
+                lcd.setCursor(5, 1);
+                lcd.print("hpa");
+                delay(2000);
+                datablink = !datablink;
+            }
 
-        while (!Serial.available())
-        {
+        } else {
+            lcd.setCursor(0, 0);
+            lcd.print("PV/Bat:    /");
+            lcd.setCursor(7, 0);
+            lcd.print(pvBuff);
+            lcd.setCursor(12, 0);
+            lcd.print(battBuff);
             lcd.setCursor(0, 1);
-            lcd.print(tempBuffer);
-        
-            lcd.setCursor(7, 1);
-            lcd.print(preassureBuffer);
+            lcd.print("I:");
+            lcd.setCursor(2, 1);
+            lcd.print(currentBuff);
+            lcd.setCursor(12, 1);
+            lcd.print(counterBuff);
+            lcd.setCursor(13, 1);
+            lcd.print("/");
+            lcd.setCursor(14, 1);
+            lcd.print(anomaryIDBuff);
+            delay(2000);
+            datablink = !datablink;
         }
-        
-        lcd.print(tempBuffer);
-    }
 
-    if(digitalRead(DATASWITCH_PIN)==LOW)
-    {
-        lcd.setCursor(0, 0);
-        lcd.print("PV/Bat:    /");
-        char buffer[8];
-        //太陽光パネル電圧
-        snprintf(buffer,sizeof(buffer),"%.1f",datastruct.PV_Voltage);
-        lcd.setCursor(7,0);
-        lcd.print(buffer);
-        //バッテリ電圧表示
-        snprintf(buffer,sizeof(buffer),"%.1f",datastruct.batt_Voltage);
-        lcd.setCursor(12,0);
-        lcd.print(buffer);
+        checkSwitch();
     }
 }

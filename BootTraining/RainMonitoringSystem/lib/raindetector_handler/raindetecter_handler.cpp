@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <raindetecter_handler.hpp>
 
-void isRainingorNot(int *is_raining,float *wd_voltage,float *pre_wd_voltage,int *wd_decrease_counter) {
+void isRainingorNot(bool *is_raining,float *wd_voltage,float *pre_wd_voltage,int *wd_decrease_counter) {
   float voltage_diff_water_detector =
       *wd_voltage - *pre_wd_voltage;
   *pre_wd_voltage = *wd_voltage;

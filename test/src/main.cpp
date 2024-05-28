@@ -121,39 +121,39 @@ void setup()
     formatData(data, &datastruct);
     datastruct.is_raining = 1;
 
-    char tempBuffer[8];
-    snprintf(tempBuffer, sizeof(tempBuffer), "%4.1f", datastruct.temp);
-    char preassureBuffer[8];
-    snprintf(preassureBuffer, sizeof(preassureBuffer), "%d", datastruct.pressure);
-    char humidityBuffer[8];
-    snprintf(humidityBuffer, sizeof(humidityBuffer), "%3.1f", datastruct.humidity);
+    char tempBuff[8];
+    snprintf(tempBuff, sizeof(tempBuff), "%4.1f", datastruct.temp);
+    char preassureBuff[8];
+    snprintf(preassureBuff, sizeof(preassureBuff), "%d", datastruct.pressure);
+    char humidityBuff[8];
+    snprintf(humidityBuff, sizeof(humidityBuff), "%3.1f", datastruct.humidity);
 
     while (1)
     {
         lcd.setCursor(0, 0);
         if (datastruct.is_raining){
-            char buffer[16];
+            char buff[16];
             lcd.print("Rainfall:     mm"); // ５マス分のスペースは降水量の５文字分
             lcd.setCursor(9, 0);
-            snprintf(buffer, sizeof(buffer), "%4.1f", datastruct.rainfall);
-            lcd.print(buffer);
+            snprintf(buff, sizeof(buff), "%4.1f", datastruct.rainfall);
+            lcd.print(buff);
         }
         if (!datastruct.is_raining){
             lcd.print("No rain");
         }
         lcd.setCursor(0, 1);
-        lcd.print(tempBuffer);
+        lcd.print(tempBuff);
         lcd.setCursor(4, 1);
         lcd.write(byte(0));
         lcd.setCursor(8, 1);
-        lcd.print(humidityBuffer);
+        lcd.print(humidityBuff);
         lcd.setCursor(12, 1);
         lcd.print("%");
         delay(2000);
         lcd.setCursor(0, 1);
         lcd.print("                ");
         lcd.setCursor(0, 1);
-        lcd.print(preassureBuffer);
+        lcd.print(preassureBuff);
         lcd.setCursor(5, 1);
         lcd.print("hpa");
         delay(2000);
@@ -166,15 +166,15 @@ void setup()
     // {
     //     lcd.setCursor(0, 0);
     //     lcd.print("PV/Bat:    /");
-    //     char buffer[8];
+    //     char buff[8];
     //     //太陽光パネル電圧
-    //     snprintf(buffer,sizeof(buffer),"%.1f",datastruct.PV_Voltage);
+    //     snprintf(buff,sizeof(buff),"%.1f",datastruct.PV_Voltage);
     //     lcd.setCursor(7,0);
-    //     lcd.print(buffer);
+    //     lcd.print(buff);
     //     //バッテリ電圧表示
-    //     snprintf(buffer,sizeof(buffer),"%.1f",datastruct.batt_Voltage);
+    //     snprintf(buff,sizeof(buff),"%.1f",datastruct.batt_Voltage);
     //     lcd.setCursor(12,0);
-    //     lcd.print(buffer);
+    //     lcd.print(buff);
     // }
 void loop()
 {
