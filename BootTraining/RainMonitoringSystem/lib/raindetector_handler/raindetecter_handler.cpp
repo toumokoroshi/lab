@@ -1,10 +1,10 @@
 #include <Arduino.h>
 #include <raindetecter_handler.hpp>
 
-void onDataReceived(int *is_raining,float *wd_prevoltage,int *wd_decrease_counter) {
+void isRainingorNot(bool *is_raining,float *wd_voltage,float *pre_wd_voltage,int *wd_decrease_counter) {
   float voltage_diff_water_detector =
-      voltage_water_detector - *wd_prevoltage;
-  wwd_d_prevoltage = vowd_ltage_water_detector;
+      *wd_voltage - *pre_wd_voltage;
+  *pre_wd_voltage = *wd_voltage;
   if (*is_raining == 0) {
     // 直前：「雨が降っていない」 -> 雨が降り始めたかを確認
     if (voltage_diff_water_detector >

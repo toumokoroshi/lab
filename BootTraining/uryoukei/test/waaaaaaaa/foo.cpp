@@ -5,17 +5,17 @@
 // 受信データフォーマット用構造体
 typedef struct
 {
-    char counter;                  /*Transmit Counter*/
-    char  anomaryID[2];                /* AnomaryID */
-    char  SP_Voltage[3];               /* solar panel voltage value */
-    char  batt_Voltage[3];             /* battery Voltage Value */
-    char  waterdetector_Voltage[4];    /* water detector Voltage Value*/
-    char  current[4];                  /* current value */
-    char  rainfall[4];                 /* precipitation */
-    char  pressure[4];                 /* atomospheric preassure */
-    char  temp[4];                     /* temperature */
-    char  humidity[3];                 /* humidity */
-    char  is_raining;                /* raining -> 1, no rain -> 0*/
+    short counter;                  /*Transmit Counter*/
+    short anomaryID;                /* AnomaryID */
+    float SP_Voltage;               /* solar panel voltage value */
+    float batt_Voltage;             /* battery Voltage Value */
+    float waterdetector_Voltage;    /* water detector Voltage Value*/
+    float current;                  /* current value */
+    float rainfall;                 /* precipitation */
+    short pressure;                 /* atomospheric preassure */
+    float temp;                     /* temperature */
+    float humidity;                 /* humidity */
+    bool is_raining;                /* raining -> 1, no rain -> 0*/
 } formattedData;
 
 
