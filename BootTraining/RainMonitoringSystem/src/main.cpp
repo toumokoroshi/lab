@@ -192,9 +192,3 @@ void loop()
     delay(2000);
     checkSwitch();
 }
-
-// put function definitions here:
-int myFunction(int x, int y)
-{
-    return x + y;
-}
