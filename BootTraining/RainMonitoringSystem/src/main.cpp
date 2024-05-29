@@ -7,8 +7,6 @@
 
 #define RX_PIN 22
 #define TX_PIN 23
-#define SWITCH_PIN 7
-#define BAUDRATE 9600
 
 float pre_wd_voltage = 0.0; // previous value of water detector volage value
 int wd_decrease_counter = 0;
@@ -46,11 +44,12 @@ static bool conbertchecker = 0;
 
 // Interrupt handler for serial data reception
 void IRAM_ATTR serialEvent1() {
-    while (Serial1.available()) {
-        char inChar = (char)Serial1.read();
+    while (Serial.available()) {
+        char inChar = (char)Serial.read();
         strBuff += inChar;
         if (inChar == '\n') {
             dataReceived = true;
+            conbertchecker = 0;
             break; // Exit the loop once a complete message is received
         }
     }
@@ -81,7 +80,8 @@ void setup() {
     lcd.print("Initializing...");
     lcd.createChar(0, celsius_degree);
 
-    Serial1.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN);
+    Serial.begin(BAUDRATE);
+    // Serial1.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN);
     while (!Serial1);
 
     pinMode(SWITCH_PIN, INPUT);
