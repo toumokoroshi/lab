@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <Arduino.h>
 #include <string.h>
 #include <setup.hpp>
 
@@ -25,6 +24,6 @@ void formatData(char *input, formattedData *dataStruct)
     dataStruct->waterdetector_Voltage /= 1000;
     dataStruct->current /= 10;
     dataStruct->rainfall /= 10;
-    dataStruct->temp = dataStruct->temp>=1000? dataStruct->temp/10-100 :(dataStruct->temp/10) *-1;
+    dataStruct->temp = dataStruct->temp >= 1000 ? dataStruct->temp / 10 - 100 : (dataStruct->temp / 10) * -1;
     dataStruct->humidity /= 10;
 }
