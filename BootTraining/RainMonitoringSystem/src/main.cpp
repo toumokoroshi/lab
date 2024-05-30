@@ -90,7 +90,7 @@ void setup()
 
     Serial.begin(BAUDRATE);
     // Serial1.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN);
-    while (!Serial1)
+    while (!Serial)
         ;
 
     pinMode(SWITCH_PIN, INPUT);
@@ -129,6 +129,13 @@ void loop()
             snprintf(battBuff, sizeof(battBuff), "%3.1f", datastruct.batt_Voltage);
             snprintf(currentBuff, sizeof(currentBuff), "%4.1f", datastruct.current);
             conbertchecker = 0;
+
+            if(datastruct.is_raining){
+                digitalWrite(LED_PIN, HIGH);
+            }else{
+                digitalWrite(LED_PIN, LOW);
+            }
+            
         }
 
         lcd.clear();
