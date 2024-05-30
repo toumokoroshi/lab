@@ -5,8 +5,13 @@
 #include <raindetecter_handler.hpp>
 #include <SDmodule.hpp>
 
-#define RX_PIN 3
-#define TX_PIN 1
+// #define RX_PIN 3
+// #define TX_PIN 1
+#define RX_PIN 22
+#define TX_PIN 23
+
+// int RX_PIN = 22;
+// int TX_PIN = 23;
 
 float pre_wd_voltage = 0.0; // previous value of water detector volage value
 int wd_decrease_counter = 0;
@@ -46,9 +51,9 @@ static bool conbertchecker = 0;
 // Interrupt handler for serial data reception
 void IRAM_ATTR serialEvent1()
 {
-    while (Serial.available())
+    while (Serial1.available())
     {
-        char inChar = (char)Serial.read();
+        char inChar = (char)Serial1.read();
         strBuff += inChar;
         if (inChar == '\n')
         {
@@ -90,8 +95,9 @@ void setup()
     lcd.createChar(0, celsius_degree);
 
     Serial.begin(BAUDRATE);
-    // Serial1.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN);
-    while (!Serial)
+    Serial1.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN);
+    Serial.print("serial!!!!");
+    while (!Serial1)
         ;
     if (!SD.begin()) {
         lcd.clear();
