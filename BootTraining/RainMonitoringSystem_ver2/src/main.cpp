@@ -8,7 +8,7 @@
 // #define RX_PIN 3
 // #define TX_PIN 1
 #define RX_PIN 22
-#define TX_PIN 23
+#define TX_PIN 21
 
 float pre_wd_voltage = 0.0; // previous value of water detector volage value
 int wd_decrease_counter = 0;
@@ -42,11 +42,14 @@ bool displayData_weather = true; // true: display weather data, false: display s
 
 // Interrupt flag
 volatile bool dataReceived = false;
-String strBuff;
+String strBuff="";
 static bool conbertchecker = 0;
 
 // Interrupt handler for serial data reception
 void IRAM_ATTR serialEvent1(){
+    //debag section starts from here
+    Serial.println("wariokomi\n");
+    //debag section ends here
     while (Serial1.available())
     {
         char inChar = (char)Serial1.read();
@@ -133,7 +136,29 @@ void loop()
             formatData(receieved_data, &datastruct);
             isRainingorNot(&datastruct.is_raining, &datastruct.waterdetector_Voltage, &pre_wd_voltage, &wd_decrease_counter);
 
-            
+            //debag section starts from here
+            //debag output to serial monitor
+            char key;
+            String data = "";
+            // 受信データがあった時だけ、処理を行う
+            while (Serial1.available())
+            { // 受信データがあるか？
+                key = Serial1.read();
+                delay(1); // 1文字だけ読み込む            // 1文字送信。受信データをそのまま送り返す。
+                data += key;
+                // Serial.print(key);
+            }
+            if (data == "\r" || data == "\n")
+            {
+                data = "";
+            }
+            if (data != "")
+            {
+                Serial.println(data);
+            }
+
+            //debag section ends here
+
             strcpy(tempBuff,"");
             strcpy(preassureBuff,"");
             strcpy(humidityBuff,"");
@@ -152,6 +177,7 @@ void loop()
             snprintf(battBuff, sizeof(battBuff), "%3.1f", datastruct.batt_Voltage);
             snprintf(currentBuff, sizeof(currentBuff), "%4.1f", datastruct.current);
             conbertchecker = 0;
+            
             Serial.print("rainfall : ");
             Serial.println(rainfallBuff);
             Serial.print("temp : ");
@@ -170,8 +196,10 @@ void loop()
             Serial.println(battBuff);
             Serial.print("current value : ");
             Serial.println(currentBuff);
+
             strBuff ="";
             strcpy(receieved_data,"");
+
             if(datastruct.is_raining){
                 digitalWrite(LED_PIN, HIGH);
             }else{

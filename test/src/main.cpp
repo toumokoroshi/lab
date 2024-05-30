@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
 int RX_PIN = 22;
-int TX_PIN = 23;
+int TX_PIN = 21;
 
 void setup()
 {
