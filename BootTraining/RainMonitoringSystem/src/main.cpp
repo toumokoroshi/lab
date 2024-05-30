@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <SD.h>
 #include <LiquidCrystal.h>
 #include <setup.hpp>
 #include <raindetecter_handler.hpp>
@@ -92,6 +93,18 @@ void setup()
     // Serial1.begin(BAUDRATE, SERIAL_8N1, RX_PIN, TX_PIN);
     while (!Serial)
         ;
+    if (!SD.begin()) {
+        lcd.clear();
+        lcd.print("Card Mount Failed");
+        return;
+    }
+    uint8_t cardType = SD.cardType();
+
+    if (cardType == CARD_NONE) {
+        lcd.clear();
+        lcd.print("No SD card attached");
+        return;
+    }
 
     pinMode(SWITCH_PIN, INPUT);
 
@@ -135,7 +148,8 @@ void loop()
             }else{
                 digitalWrite(LED_PIN, LOW);
             }
-            
+
+            writeFile(SD, "/test.txt", receieved_data);
         }
 
         lcd.clear();
