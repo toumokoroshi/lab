@@ -5,16 +5,16 @@
 #include <raindetecter_handler.hpp>
 #include <SDmodule.hpp>
 
-/* nabesho_code START*/
-#include <gas.hpp> 
+// /* nabesho_code START*/
+// #include <gas.hpp> 
 
-GAS gas;
+// GAS gas;
 
-TaskHandle_t thp[1];
-QueueHandle_t xQueue_1;
+// TaskHandle_t thp[1];
+// QueueHandle_t xQueue_1;
 
-String processing_data_str = "";
-/* nabesho_code END */
+// String processing_data_str = "";
+// /* nabesho_code END */
 
 // #define RX_PIN 3
 // #define TX_PIN 1
@@ -75,29 +75,29 @@ void IRAM_ATTR serialEvent1(){
 }
 
 
-/* nabesho_code START */
+// /* nabesho_code START */
 
-void Core0a(void *args) {
-  String received_data_str = "";  // データ受信用の変数
-  while (1) {
-    /* メッセージ受信待ち */
-    xQueueReceive(xQueue_1, &received_data_str, portMAX_DELAY);
-    // xQueueSend([キューハンドル名], [データを受信するアドレス],
-    // [キュー空きを待つ最大時間。portMAX_DELAYで永久待ち])
-    if (received_data_str == processing_data_str) {
-      // OK!
-      Serial.println("No Problem!");
-    } else {
-      // NO!
-      Serial.println("Different!! Need to be skipped");
-    }
-    Serial.println(processing_data_str);
-    gas.send_raw(processing_data_str);
-    delay(1);
-  }
-}
+// void Core0a(void *args) {
+//   String received_data_str = "";  // データ受信用の変数
+//   while (1) {
+//     /* メッセージ受信待ち */
+//     xQueueReceive(xQueue_1, &received_data_str, portMAX_DELAY);
+//     // xQueueSend([キューハンドル名], [データを受信するアドレス],
+//     // [キュー空きを待つ最大時間。portMAX_DELAYで永久待ち])
+//     if (received_data_str == processing_data_str) {
+//       // OK!
+//       Serial.println("No Problem!");
+//     } else {
+//       // NO!
+//       Serial.println("Different!! Need to be skipped");
+//     }
+//     Serial.println(processing_data_str);
+//     gas.send_raw(processing_data_str);
+//     delay(1);
+//   }
+// }
 
-/* nabesho_code END */
+// /* nabesho_code END */
 
 // Function to check the state of the switch
 void checkSwitch()
@@ -147,15 +147,16 @@ void setup()
     // }
 
 
-    /* nabesho_code START */
+    // /* nabesho_code START */
 
-    gas.init();
-    xQueue_1 = xQueueCreate(10, 16);
-    xTaskCreatePinnedToCore(Core0a, "Core0a", 8192, NULL, 3, &thp[0], 0);
+    // gas.init();
+    // xQueue_1 = xQueueCreate(10, 16);
+    // xTaskCreatePinnedToCore(Core0a, "Core0a", 8192, NULL, 3, &thp[0], 0);
 
-    /* nabesho_code END */
+    // /* nabesho_code END */
 
     pinMode(SWITCH_PIN, INPUT);
+    pinMode(LED_PIN, OUTPUT);
 
     lcd.clear();
     lcd.print("Get Ready!");
@@ -178,10 +179,10 @@ void loop()
         if (conbertchecker)
         {
 
-            /* nabesho_code START */
-            processing_data_str = strBuff;
-            xQueueSend(xQueue_1, &processing_data_str, 0);
-            /* nabesho_code END */
+            // /* nabesho_code START */
+            // processing_data_str = strBuff;
+            // xQueueSend(xQueue_1, &processing_data_str, 0);
+            // /* nabesho_code END */
 
 
             strBuff.toCharArray(receieved_data, sizeof(receieved_data));
