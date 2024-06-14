@@ -114,7 +114,7 @@ int main() {
     int xloop = (int)((x_max-x_min)/x_step) + 1;
     printf("xloop = %d \n", xloop);
 
-    #pragma omp parallel for
+    // #pragma omp parallel for
     for (int xloop_cnt = 0; xloop_cnt <= xloop; xloop_cnt++) {
         
         count++;
