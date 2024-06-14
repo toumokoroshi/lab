@@ -4,5 +4,6 @@
         "header_tuyoi.h": "c",
         "stdio.h": "c"
     },
-    "C_Cpp.intelliSenseEngineFallback": "disabled"
+    "C_Cpp.intelliSenseEngineFallback": "disabled",
+    "C_Cpp.default.compilerPath": "C:\\program_lang\\mingw64\\bin\\gcc.exe"
 }

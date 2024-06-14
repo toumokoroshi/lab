@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <math.h>
+#include<omp.h>
+
 #define epsilon 1.0e-10;
 FILE* outputfile;
 FILE* myfile;
-double Y[4], Z[4], Z1[4], K[4][6];
+// double Y[4], Z[4], Z1[4], K[4][6];
+double Y[4], Z[4], Z1[4], K[4][6], Y1[4],Y2[4],Y3[4];
 double X[4];
 double mu = 3.003e-6;
 double t_end = 10;
@@ -11,7 +14,7 @@ double dt = 0.0001;
 double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
-double x_min = 1.0;
+double x_min = 0.99;
 double x_max = 1.01;
 double x_step = 0.0001;
 double C = 2.999902;
@@ -22,6 +25,14 @@ double x, y, vy, vx;
 double V;
 int count;
 int i, j = 0;
+double c1=1/(2*(2-pow(2,1/3)));
+double c2=(1-pow(2,1/3))/(2*(2-pow(2,1/3)));
+double c3=(1-pow(2,1/3))/(2*(2-pow(2,1/3)));
+double c4=1/(2*(2-pow(2,1/3)));
+double d1=1/(2-pow(2,1/3));
+double d2=-pow(2,1/3)/(2-pow(2,1/3));
+double d3=1/(2-pow(2,1/3));
+double d4=0.0;
 
 
 double distance1(double x, double y) {
@@ -49,6 +60,16 @@ void equation(int n, const double Y[4], double K[4][6]) {
     }
 }
 
+// ////equation of motion of backward 
+void equation_sy(double Y[4], const double c, const double d, double Z[4]){
+       Z[0]=Y[0]+(+Y[1]+Y[2])*dt*c;
+    //    Z[0]=Y[0]-(+Y[1]+Y[2])*dt*c;
+       Z[1]=Y[1]+ (-Y[0]+Y[3])*dt*c;
+    //    Z[1]=Y[1]-(-Y[0]+Y[3])*dt*c;
+       Z[2]=Y[2]-(+Y[3]-(1-mu)*(Z[0]+mu)/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[0]-1+mu)/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+       Z[3]=Y[3]-(-Y[2]-(1-mu)*(Z[1])/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[1])/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+}
+
 void vector(const double X[4], const double Z[4], double W[2]) {
     for (int i = 0; i < 2; i++) {
         W[i] = Z[i] - X[i];
@@ -73,12 +94,13 @@ void unitvector(double W[2], double norm, double UV[2]) {
 
 int main() {
     printf("\n  **********************************************************************\n");
-    printf("  *   Calculator of SALI with Runge-Kutta method                       *\n");
+    printf("  *   Calculator of SALI with sympletic method                         *\n");
     printf("  *                                                                    *\n");
     printf("  *   This source code was written by Yuto Sakurai,                    *\n");
     printf("  *         Department of Aerospace Engineering,  Nagoya University    *\n");
     printf("  *                                                                    *\n");
-    printf("  *  Last Update : 2020.10.12                                          *\n");
+    printf("  *   updated by TBT                                                   *\n");
+    printf("  *  Last Update :                                                     *\n");
     printf("  **********************************************************************\n\n");
 
     outputfile = fopen("output_new.d", "w");
@@ -87,13 +109,25 @@ int main() {
     }
     printf(" Simulating >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-    for (x = x_min; x <= x_max; x += x_step) {
+    x = x_min; 
+
+    int xloop = (int)((x_max-x_min)/x_step) + 1;
+    printf("xloop = %d \n", xloop);
+
+    #pragma omp parallel for
+    for (int xloop_cnt = 0; xloop_cnt <= xloop; xloop_cnt++) {
+        
         count++;
         printf("\b\b\b\b\b\b\b\b\b\b\b");
-        printf(" %d / %d", count, (int)((x_max - x_min) / x_step + 1));
+        printf(" %d / %d", count, xloop);
         y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
         y_min = -y_max;
-        for (y = y_min; y <= y_max; y += x_step) {
+        y = y_min;
+
+        int yloop = (int)((y_max-y_min)/x_step) + 1;
+        // #pragma omp parallel for
+        for (int yloop_cnt = 0; yloop_cnt <= yloop; yloop_cnt++) {
+
             q1 = distance1(x, y);
             q2 = distance2(x, y);
             if (q2 < 0.00007) {
@@ -132,34 +166,43 @@ int main() {
                 }else if(q2 > 0.03){
                     break;
                 }
+
+                equation_sy(X,c1,d1,Y1);
+                equation_sy(Y1,c2,d2,Y2);
+                equation_sy(Y2,c3,d3,Y3);
+                equation_sy(Y3,c4,d4,X);
+
+                equation_sy(Z,c1,d1,Y1);
+                equation_sy(Y1,c2,d2,Y2);
+                equation_sy(Y2,c3,d3,Y3);
+                equation_sy(Y3,c4,d4,Z);
+                
+                equation_sy(Z1,c1,d1,Y1);
+                equation_sy(Y1,c2,d2,Y2);
+                equation_sy(Y2,c3,d3,Y3);
+                equation_sy(Y3,c4,d4,Z1);
                 //////////////////////////////////////////////////////////////Runge-Kutta method///////////////////////////////////////////////////////////
+
+
                 // for (i = 0; i < 4; i++) {
                 //     Y[i] = X[i];
                 // }
                 // equation(0, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + K[i][0] / 4.0;
+                //     Y[i] = X[i] + K[i][0] / 2.0;
                 // }
                 // equation(1, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + 3.0 * K[i][0] / 32.0 + 9.0 * K[i][1] / 32.0;
+                //     Y[i] = X[i] + K[i][1] / 2.0;
                 // }
                 // equation(2, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + 1932.0 * K[i][0] / 2197.0 - 7200.0 * K[i][1] / 2197.0 + 7296.0 * K[i][2] / 2197.0;
+                //     Y[i] = X[i] + K[i][2];
                 // }
                 // equation(3, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + 439.0 * K[i][0] / 216.0 - 8.0 * K[i][1] + 3680.0 * K[i][2] / 513.0 - 845.0 * K[i][3] / 4104.0;
-                // }
-                // equation(4, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] - 8.0 * K[i][0] / 27.0 + 2.0 * K[i][1] - 3544.0 * K[i][2] / 2565.0 + 1859.0 * K[i][3] / 4104.0 - 11.0 * K[i][4] / 40.0;
-                // }
-                // equation(5, Y, K);
 
-                // for (int i = 0; i < 4; i++) {
-                //     X[i] += 16.0 * K[i][0] / 135.0 + 6656.0 * K[i][2] / 12825.0 + 28561.0 * K[i][3] / 56430.0 - 9.0 * K[i][4] / 50.0 + 2.0 * K[i][5] / 55.0;
+                // for (i = 0; i < 4; i++) {
+                //     X[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
                 // }
 
 
@@ -169,28 +212,20 @@ int main() {
                 // }
                 // equation(0, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + K[i][0] / 4.0;
+                //     Y[i] = Z[i] + K[i][0] / 2.0;
                 // }
                 // equation(1, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + 3.0 * K[i][0] / 32.0 + 9.0 * K[i][1] / 32.0;
+                //     Y[i] = Z[i] + K[i][1] / 2.0;
                 // }
                 // equation(2, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + 1932.0 * K[i][0] / 2197.0 - 7200.0 * K[i][1] / 2197.0 + 7296.0 * K[i][2] / 2197.0;
+                //     Y[i] = Z[i] + K[i][2];
                 // }
                 // equation(3, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + 439.0 * K[i][0] / 216.0 - 8.0 * K[i][1] + 3680.0 * K[i][2] / 513.0 - 845.0 * K[i][3] / 4104.0;
-                // }
-                // equation(4, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] - 8.0 * K[i][0] / 27.0 + 2.0 * K[i][1] - 3544.0 * K[i][2] / 2565.0 + 1859.0 * K[i][3] / 4104.0 - 11.0 * K[i][4] / 40.0;
-                // }
-                // equation(5, Y, K);
 
-                // for (int i = 0; i < 4; i++) {
-                //     Z[i] += 16.0 * K[i][0] / 135.0 + 6656.0 * K[i][2] / 12825.0 + 28561.0 * K[i][3] / 56430.0 - 9.0 * K[i][4] / 50.0 + 2.0 * K[i][5] / 55.0;
+                // for (i = 0; i < 4; i++) {
+                //     Z[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
                 // }
 
 
@@ -199,95 +234,21 @@ int main() {
                 // }
                 // equation(0, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + K[i][0] / 4.0;
+                //     Y[i] = Z1[i] + K[i][0] / 2.0;
                 // }
                 // equation(1, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + 3.0 * K[i][0] / 32.0 + 9.0 * K[i][1] / 32.0;
+                //     Y[i] = Z1[i] + K[i][1] / 2.0;
                 // }
                 // equation(2, Y, K);
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + 1932.0 * K[i][0] / 2197.0 - 7200.0 * K[i][1] / 2197.0 + 7296.0 * K[i][2] / 2197.0;
+                //     Y[i] = Z1[i] + K[i][2];
                 // }
                 // equation(3, Y, K);
+
                 // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + 439.0 * K[i][0] / 216.0 - 8.0 * K[i][1] + 3680.0 * K[i][2] / 513.0 - 845.0 * K[i][3] / 4104.0;
+                //     Z1[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
                 // }
-                // equation(4, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] - 8.0 * K[i][0] / 27.0 + 2.0 * K[i][1] - 3544.0 * K[i][2] / 2565.0 + 1859.0 * K[i][3] / 4104.0 - 11.0 * K[i][4] / 40.0;
-                // }
-                // equation(5, Y, K);
-
-                // for (int i = 0; i < 4; i++) {
-                //     Z1[i] += 16.0 * K[i][0] / 135.0 + 6656.0 * K[i][2] / 12825.0 + 28561.0 * K[i][3] / 56430.0 - 9.0 * K[i][4] / 50.0 + 2.0 * K[i][5] / 55.0;
-                // }
-
-                for (i = 0; i < 4; i++) {
-                    Y[i] = X[i];
-                }
-                equation(0, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = X[i] + K[i][0] / 2.0;
-                }
-                equation(1, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = X[i] + K[i][1] / 2.0;
-                }
-                equation(2, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = X[i] + K[i][2];
-                }
-                equation(3, Y, K);
-
-                for (i = 0; i < 4; i++) {
-                    X[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
-                }
-
-
-
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z[i];
-                }
-                equation(0, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z[i] + K[i][0] / 2.0;
-                }
-                equation(1, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z[i] + K[i][1] / 2.0;
-                }
-                equation(2, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z[i] + K[i][2];
-                }
-                equation(3, Y, K);
-
-                for (i = 0; i < 4; i++) {
-                    Z[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
-                }
-
-
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z1[i];
-                }
-                equation(0, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z1[i] + K[i][0] / 2.0;
-                }
-                equation(1, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z1[i] + K[i][1] / 2.0;
-                }
-                equation(2, Y, K);
-                for (i = 0; i < 4; i++) {
-                    Y[i] = Z1[i] + K[i][2];
-                }
-                equation(3, Y, K);
-
-                for (i = 0; i < 4; i++) {
-                    Z1[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
-                }
                 ///////////////////////////////////////////////////////End Runge-Kutta///////////////////////////////////////////////////////////////////
             }
 
@@ -321,8 +282,12 @@ int main() {
             }
 
             fprintf(outputfile, "%f  %f  %f\n", x, y, SALI);
+
+            y += x_step;
+            
         }
         fprintf(outputfile, "\n");
+        x += x_step;
     }
     printf("\n Finish simulation!!!!!!\n");
     fclose(outputfile);
@@ -350,3 +315,4 @@ int main() {
     //fprintf(myfile, "pause -1\n");
     return 0;
 }
+
