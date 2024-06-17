@@ -1,11 +1,11 @@
+#include <omp.h>
 #include <stdio.h>
+// #include "omp_lib.h"
+
 int main() {
-    double x_max = 1.01;
-    double x_min = 1.00;
-    double x_step = 0.001;
-    int xloopNum = (int)((x_max-x_min)/x_step);
-
-    printf("xloopNum = %d", xloopNum);
-
+    #pragma omp parallel for
+    for (int i = 0; i < 10; i++) {
+        printf("the number of threas: %d, i: %d\n", omp_get_thread_num(), i);
+    }
     return 0;
 }
