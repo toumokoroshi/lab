@@ -19,9 +19,12 @@
 class PCRTBP
 {
 private:
-    //! 状態変数
-    double x[2], v[2], v_abs, c_jacobi;
+    //! x[2]:回転座標系におけるx,yの組, v[2] : 回転座標系におけるvx,vyの組, q[2]:一般化運動量vx-y,vy+xの組,
+    //! v_abs : 回転座標系における速度の大きさ, c_jacobi : や子微積分
+    double x[2], v[2], q[2],v_abs, c_jacobi;
+    int k;  //k=1:prograde motion, k=-1:retrograde motion
     double mu = 3.003e-6; 
+    double dt = 0.0001;
     double c[4] = 
     {
         1/(2*(2-std::pow(2,1.0/3.0))),
@@ -42,9 +45,10 @@ public:
     * @brief コンストラクタ
     * @param x 初期位置のx座標
     * @param y 初期位置のy座標
+    * @param k 運動の種類 (1: prograde, -1: retrograde)
     * @param c_jacobi ヤコビ積分
     */
-    PCRTBP(double x, double y, double c_jacobi);
+    PCRTBP(double x, double y, int k, double c_jacobi);
 
     double get_x() const;
     double get_y() const;
@@ -56,22 +60,31 @@ public:
 
     double calc_r1() const;
     double calc_r2() const;
-    void calc_symplectic();
+    void calc_symplectic4();
 };
 
 // クラスメソッドの定義
 
-PCRTBP::PCRTBP(double x, double y, double c_jacobi) : c_jacobi(c_jacobi)
+PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi) : k(k), c_jacobi(c_jacobi)
 {
     this->x[0] = x;
     this->x[1] = y;
 
-    double r1 = std::sqrt((x+mu)*(x+mu)+y*y); 
-    double r2 = std::sqrt((x-1+mu)*(x-1+mu)+y*y);
+    double r1 = calc_r1(); 
+    double r2 = calc_r2();
 
-    if ((x * x + y * y + 2 * (1 - mu) / r1 + 2 * mu / r2 + mu * (1 - mu) - c_jacobi) < 0)
+    double velocity_term = x * x + y * y + 2 * (1 - mu) / r1 + 2 * mu / r2 + mu * (1 - mu) - c_jacobi;
+    if (velocity_term < 0)
     {
-        throw std::runtime_error("absolute value of the velocity has negative value");
+        throw std::runtime_error("Absolute value of the velocity has a negative value");
+    }
+    else
+    {
+        v_abs = std::sqrt(velocity_term);
+        this->v[0] = -k * v_abs * y / r2;
+        this->v[1] = k * v_abs * (x - 1 + mu) / r2;
+        this->q[0] = v[0]-x[1];
+        this->q[1] = v[1]+x[0];
     }
 }
 
@@ -88,8 +101,7 @@ void PCRTBP::set_x(double x, double y)
 
 void PCRTBP::set_v()
 {
-    // 速度の設定に関する実装
-    // 要る？
+    // 速度の設定に関する実装が必要な場合に追加
 }
 
 double PCRTBP::calc_r1() const
@@ -102,9 +114,19 @@ double PCRTBP::calc_r2() const
     return std::sqrt((x[0] - 1 + mu) * (x[0] - 1 + mu) + x[1] * x[1]);
 }
 
-void PCRTBP::calc_symplectic()
+void PCRTBP::calc_symplectic4()
 {
-    // シンプレクティック法による計算の実装
+    double x_buff0[2], x_buff1[2];
+    double q_buff0[2], q_buff1[2];
+
+
+    for (int i = 0; i < 4; i++)
+    {
+        x_buff[0]=x[0]+(x[1]+q[0])*c[i]*dt;
+        x_buff[1]=x[1]+(-x[0]+q[1])*c[i]*dt;
+        q[0]=q[0]+(+q[1]-(1-mu)*(q[0]+mu)/std::pow(((x[0]+mu)*(x[0]+mu)+x[1]*x[1]),3./2.)-mu*(x[0]-1+mu)/std::pow(((x[0]-1+mu)*(x[0]-1+mu)+x[1]*x[1]),3./2.))*dt*d[i];
+        q[1]=q[1]+(-q[0]-(1-mu)*(q[1])/std::pow(((x[0]+mu)*(x[0]+mu)+x[1]*x[1]),3./2.)-mu*(x[1])/std::pow(((x[0]-1+mu)*(x[0]-1+mu)+x[1]*x[1]),3./2.))*dt*d[i];
+    }
 }
 
 #endif // PCRTBP_H

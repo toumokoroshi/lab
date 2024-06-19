@@ -18,7 +18,7 @@ double Y[4], Z[4], Z1[4], K[4][6];
 double X[4];
 double mu = 3.003e-6;
 double t_end = 10;
-double dt = 0.001;
+double dt = 0.0001;
 double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
@@ -125,7 +125,7 @@ int main() {
         printf("\b\b\b\b\b\b\b\b\b\b\b");
         printf(" %d / %d", count, (int)((x_max - x_min) / x_step + 1));
         y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
-        y_min = -y_min;
+        y_min = -y_max;
         // y_max = -0.009;
         // y_min = -0.01;
         for (y = y_min; y <= y_max; y += x_step) {
