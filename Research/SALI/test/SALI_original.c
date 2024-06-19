@@ -1,8 +1,10 @@
+/**
+ * @brief rungekutta法を用いたSALIの計算と描画
+ * @details openmpが使えるようにloopのインデックスの見直し
+ */
+
 #include <stdio.h>
 #include <math.h>
-
-#include<omp.h>
-
 #define epsilon 1.0e-10;
 FILE* outputfile;
 FILE* myfile;
@@ -15,7 +17,7 @@ double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
 double x_min = 1.0;
-double x_max = 1.01;
+double x_max = 1.0;
 double x_step = 0.0001;
 double C = 2.999902;
 double y_min, y_max;
@@ -83,38 +85,29 @@ int main() {
     printf("  *                                                                    *\n");
     printf("  *  Last Update : 2020.10.12                                          *\n");
     printf("  **********************************************************************\n\n");
-    
+
     outputfile = fopen("output_new.d", "w");
     if (outputfile == NULL) {
         printf("  Can not open write file");
     }
     printf(" Simulating >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
-    
 
-    x = x_min; 
-    int x_mesh_size = (int)((x_max-x_min)/x_step)+1;
-
-    #pragma omp parallel for
-    for (int xloop_counter = 0; xloop_counter < x_mesh_size; xloop_counter++) {
+    for (x = x_min; x <= x_max; x += x_step) {
         count++;
-        printf("\b\b\b\b\b\b\b\b\b\b\b");
-        printf(" %d / %d", xloop_counter+1, x_mesh_size);
-        y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
-        y_min = 0;
-        
-        int y_mesh_size = (int)(round((y_max-y_min)/x_step)) + 1; //roundしないと丸め誤差の影響で適切にメッシュサイズを評価できない
-        
-        for (int yloop_counter = 0; yloop_counter < y_mesh_size; yloop_counter++) {
-
+        // printf("\b\b\b\b\b\b\b\b\b\b\b");
+        // printf(" %d / %d", count, (int)((x_max - x_min) / x_step + 1));
+        x = x_min;
+        y_max = -0.009;
+        y_min = -0.01;
         for (y = y_min; y <= y_max; y += x_step) {
             q1 = distance1(x, y);
             q2 = distance2(x, y);
+
+            // printf("before q2 : %f\n",q2);
             if (q2 < 0.00007) {
-                y += x_step;
                 continue;
             }
             else if ((x * x + y * y + 2 * (1 - mu) / q1 + 2 * mu / q2 + mu * (1 - mu) - C) < 0) {   ////////Out of ZVC
-                y += x_step;
                 continue;
             }
 
@@ -147,96 +140,7 @@ int main() {
                 }else if(q2 > 0.03){
                     break;
                 }
-                //////////////////////////////////////////////////////////////Runge-Kutta method///////////////////////////////////////////////////////////
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i];
-                // }
-                // equation(0, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + K[i][0] / 4.0;
-                // }
-                // equation(1, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + 3.0 * K[i][0] / 32.0 + 9.0 * K[i][1] / 32.0;
-                // }
-                // equation(2, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + 1932.0 * K[i][0] / 2197.0 - 7200.0 * K[i][1] / 2197.0 + 7296.0 * K[i][2] / 2197.0;
-                // }
-                // equation(3, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + 439.0 * K[i][0] / 216.0 - 8.0 * K[i][1] + 3680.0 * K[i][2] / 513.0 - 845.0 * K[i][3] / 4104.0;
-                // }
-                // equation(4, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] - 8.0 * K[i][0] / 27.0 + 2.0 * K[i][1] - 3544.0 * K[i][2] / 2565.0 + 1859.0 * K[i][3] / 4104.0 - 11.0 * K[i][4] / 40.0;
-                // }
-                // equation(5, Y, K);
-
-                // for (int i = 0; i < 4; i++) {
-                //     X[i] += 16.0 * K[i][0] / 135.0 + 6656.0 * K[i][2] / 12825.0 + 28561.0 * K[i][3] / 56430.0 - 9.0 * K[i][4] / 50.0 + 2.0 * K[i][5] / 55.0;
-                // }
-
-
-
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i];
-                // }
-                // equation(0, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + K[i][0] / 4.0;
-                // }
-                // equation(1, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + 3.0 * K[i][0] / 32.0 + 9.0 * K[i][1] / 32.0;
-                // }
-                // equation(2, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + 1932.0 * K[i][0] / 2197.0 - 7200.0 * K[i][1] / 2197.0 + 7296.0 * K[i][2] / 2197.0;
-                // }
-                // equation(3, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + 439.0 * K[i][0] / 216.0 - 8.0 * K[i][1] + 3680.0 * K[i][2] / 513.0 - 845.0 * K[i][3] / 4104.0;
-                // }
-                // equation(4, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] - 8.0 * K[i][0] / 27.0 + 2.0 * K[i][1] - 3544.0 * K[i][2] / 2565.0 + 1859.0 * K[i][3] / 4104.0 - 11.0 * K[i][4] / 40.0;
-                // }
-                // equation(5, Y, K);
-
-                // for (int i = 0; i < 4; i++) {
-                //     Z[i] += 16.0 * K[i][0] / 135.0 + 6656.0 * K[i][2] / 12825.0 + 28561.0 * K[i][3] / 56430.0 - 9.0 * K[i][4] / 50.0 + 2.0 * K[i][5] / 55.0;
-                // }
-
-
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i];
-                // }
-                // equation(0, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + K[i][0] / 4.0;
-                // }
-                // equation(1, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + 3.0 * K[i][0] / 32.0 + 9.0 * K[i][1] / 32.0;
-                // }
-                // equation(2, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + 1932.0 * K[i][0] / 2197.0 - 7200.0 * K[i][1] / 2197.0 + 7296.0 * K[i][2] / 2197.0;
-                // }
-                // equation(3, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + 439.0 * K[i][0] / 216.0 - 8.0 * K[i][1] + 3680.0 * K[i][2] / 513.0 - 845.0 * K[i][3] / 4104.0;
-                // }
-                // equation(4, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] - 8.0 * K[i][0] / 27.0 + 2.0 * K[i][1] - 3544.0 * K[i][2] / 2565.0 + 1859.0 * K[i][3] / 4104.0 - 11.0 * K[i][4] / 40.0;
-                // }
-                // equation(5, Y, K);
-
-                // for (int i = 0; i < 4; i++) {
-                //     Z1[i] += 16.0 * K[i][0] / 135.0 + 6656.0 * K[i][2] / 12825.0 + 28561.0 * K[i][3] / 56430.0 - 9.0 * K[i][4] / 50.0 + 2.0 * K[i][5] / 55.0;
-                // }
+               
 
                 for (i = 0; i < 4; i++) {
                     Y[i] = X[i];
@@ -307,9 +211,8 @@ int main() {
             }
 
             if(t<t_end){
-                // printf("q2 : %.10f ->>>>>>>>>>>>>>>>>>",q2);
-                // printf(" calculation aborted while SALI\n\n");
-                y += x_step;
+                fprintf(outputfile, "%f  %f  \n", x, y);
+                printf("x : %f,y : %f \ncalculation aborted while SALI\n\n",x,y);
                 continue;
             }
 
@@ -336,13 +239,13 @@ int main() {
             else {
                 SALI = norm_SALI1;
             }
-
+            printf("after q2 : %f\n",q2);
+            printf("t : %f\n",t);
+            printf("x[0] : %f, x[1] : %f\n",X[0],X[1]);
+            printf("x : %f, y : %f\n\n",x,y);
             fprintf(outputfile, "%f  %f  %f\n", x, y, SALI);
-            y += x_step;
         }
         fprintf(outputfile, "\n");
-        x += x_step;
-
     }
     printf("\n Finish simulation!!!!!!\n");
     fclose(outputfile);

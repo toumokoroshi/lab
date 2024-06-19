@@ -1,23 +1,31 @@
-#include <stdio.h>
-#include <math.h>
+/**
+ * @file SALI_sympletic.c
+ * @brief シンプレティック積分法を用いたSALIの計算と描画
+ * @brief 一般化運動量はVとしている
+ * @author tabata
+ * @date 2024/06/18
+ */
+
+#include <stdio.h>7
+#include <math.h>  
+
 #include<omp.h>
 
 #define epsilon 1.0e-10;
 FILE* outputfile;
 FILE* myfile;
-// double Y[4], Z[4], Z1[4], K[4][6];
-double Y[4], Z[4], Z1[4], K[4][6], Y1[4],Y2[4],Y3[4];
+double Y[4], Z[4], Z1[4], K[4][6];
 double X[4];
 double mu = 3.003e-6;
 double t_end = 10;
-double dt = 0.0001;
+double dt = 0.001;
 double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
-double x_min = 0.99;
+double x_min = 1.0;
 double x_max = 1.01;
 double x_step = 0.0001;
-double C = 2.999902;
+double C = 3.000201;
 double y_min, y_max;
 double k = -1;  ///////k=1:prograde motion, k=-1:retrograde motion
 double q1, q2;
@@ -33,7 +41,6 @@ double d1=1/(2-pow(2,1/3));
 double d2=-pow(2,1/3)/(2-pow(2,1/3));
 double d3=1/(2-pow(2,1/3));
 double d4=0.0;
-
 
 double distance1(double x, double y) {
     q1 = (x + mu) * (x + mu) + y * y;
@@ -60,14 +67,19 @@ void equation(int n, const double Y[4], double K[4][6]) {
     }
 }
 
-// ////equation of motion of backward 
+// //equation of motion of backward 
+// void equation_sy(double Y[4], const double c, const double d, double Z[4]){
+//        Z[0]=Y[0]+(Y[2])*dt*c;
+//        Z[1]=Y[1]+(Y[3])*dt*c;
+//        Z[2]=Y[2]-((1-mu)*(Z[0]+mu)/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)+mu*(Z[0]-1+mu)/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+//        Z[3]=Y[3]-((1-mu)*(Z[1])/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)+mu*(Z[1])/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+// }
+
 void equation_sy(double Y[4], const double c, const double d, double Z[4]){
-       Z[0]=Y[0]+(+Y[1]+Y[2])*dt*c;
-    //    Z[0]=Y[0]-(+Y[1]+Y[2])*dt*c;
-       Z[1]=Y[1]+ (-Y[0]+Y[3])*dt*c;
-    //    Z[1]=Y[1]-(-Y[0]+Y[3])*dt*c;
-       Z[2]=Y[2]-(+Y[3]-(1-mu)*(Z[0]+mu)/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[0]-1+mu)/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
-       Z[3]=Y[3]-(-Y[2]-(1-mu)*(Z[1])/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[1])/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+       Z[0]=Y[0]+(Y[2])*dt*c;
+       Z[1]=Y[1]+(Y[3])*dt*c;
+       Z[2]=Y[2]+(-(1-mu)*(Z[0]+mu)/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[0]-1+mu)/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+       Z[3]=Y[3]+(-(1-mu)*(Z[1])/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[1])/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
 }
 
 void vector(const double X[4], const double Z[4], double W[2]) {
@@ -94,13 +106,12 @@ void unitvector(double W[2], double norm, double UV[2]) {
 
 int main() {
     printf("\n  **********************************************************************\n");
-    printf("  *   Calculator of SALI with sympletic method                         *\n");
+    printf("  *   Calculator of SALI with Runge-Kutta method                       *\n");
     printf("  *                                                                    *\n");
     printf("  *   This source code was written by Yuto Sakurai,                    *\n");
     printf("  *         Department of Aerospace Engineering,  Nagoya University    *\n");
     printf("  *                                                                    *\n");
-    printf("  *   updated by TBT                                                   *\n");
-    printf("  *  Last Update :                                                     *\n");
+    printf("  *  Last Update : 2020.10.12                                          *\n");
     printf("  **********************************************************************\n\n");
 
     outputfile = fopen("output_new.d", "w");
@@ -109,27 +120,18 @@ int main() {
     }
     printf(" Simulating >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-    x = x_min; 
-
-    int xloop = (int)((x_max-x_min)/x_step) + 1;
-    printf("xloop = %d \n", xloop);
-
-    // #pragma omp parallel for
-    for (int xloop_cnt = 0; xloop_cnt <= xloop; xloop_cnt++) {
-        
+    for (x = x_min; x <= x_max; x += x_step) {
         count++;
         printf("\b\b\b\b\b\b\b\b\b\b\b");
-        printf(" %d / %d", count, xloop);
+        printf(" %d / %d", count, (int)((x_max - x_min) / x_step + 1));
         y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
-        y_min = -y_max;
-        y = y_min;
-
-        int yloop = (int)((y_max-y_min)/x_step) + 1;
-        // #pragma omp parallel for
-        for (int yloop_cnt = 0; yloop_cnt <= yloop; yloop_cnt++) {
-
+        y_min = 0;
+        // y_max = -0.009;
+        // y_min = -0.01;
+        for (y = y_min; y <= y_max; y += x_step) {
             q1 = distance1(x, y);
             q2 = distance2(x, y);
+            // printf("before q2 : %f\n",q2);
             if (q2 < 0.00007) {
                 continue;
             }
@@ -167,95 +169,43 @@ int main() {
                     break;
                 }
 
-                equation_sy(X,c1,d1,Y1);
-                equation_sy(Y1,c2,d2,Y2);
-                equation_sy(Y2,c3,d3,Y3);
-                equation_sy(Y3,c4,d4,X);
+            double buff1[4],buff2[4],buff3[4];
 
-                equation_sy(Z,c1,d1,Y1);
-                equation_sy(Y1,c2,d2,Y2);
-                equation_sy(Y2,c3,d3,Y3);
-                equation_sy(Y3,c4,d4,Z);
-                
-                equation_sy(Z1,c1,d1,Y1);
-                equation_sy(Y1,c2,d2,Y2);
-                equation_sy(Y2,c3,d3,Y3);
-                equation_sy(Y3,c4,d4,Z1);
-                //////////////////////////////////////////////////////////////Runge-Kutta method///////////////////////////////////////////////////////////
+            //update reference trajetry
+            equation_sy(X,c1,d1,buff1);
+            equation_sy(buff1,c2,d2,buff2);
+            equation_sy(buff2,c3,d3,buff3);
+            equation_sy(buff3,c4,d4,X);
 
+            //update init y-shifted trajetry
+            equation_sy(Z,c1,d1,buff1);
+            equation_sy(buff1,c2,d2,buff2);
+            equation_sy(buff2,c3,d3,buff3);
+            equation_sy(buff3,c4,d4,Z);
 
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i];
-                // }
-                // equation(0, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + K[i][0] / 2.0;
-                // }
-                // equation(1, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + K[i][1] / 2.0;
-                // }
-                // equation(2, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = X[i] + K[i][2];
-                // }
-                // equation(3, Y, K);
+            //update init x-shifted trajetry
+            equation_sy(Z1,c1,d1,buff1);
+            equation_sy(buff1,c2,d2,buff2);
+            equation_sy(buff2,c3,d3,buff3);
+            equation_sy(buff3,c4,d4,Z1);
 
-                // for (i = 0; i < 4; i++) {
-                //     X[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
-                // }
-
-
-
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i];
-                // }
-                // equation(0, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + K[i][0] / 2.0;
-                // }
-                // equation(1, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + K[i][1] / 2.0;
-                // }
-                // equation(2, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z[i] + K[i][2];
-                // }
-                // equation(3, Y, K);
-
-                // for (i = 0; i < 4; i++) {
-                //     Z[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
-                // }
-
-
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i];
-                // }
-                // equation(0, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + K[i][0] / 2.0;
-                // }
-                // equation(1, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + K[i][1] / 2.0;
-                // }
-                // equation(2, Y, K);
-                // for (i = 0; i < 4; i++) {
-                //     Y[i] = Z1[i] + K[i][2];
-                // }
-                // equation(3, Y, K);
-
-                // for (i = 0; i < 4; i++) {
-                //     Z1[i] += ( K[i][0] + 2.0 * (K[i][1] + K[i][2]) + K[i][3] ) / 6.0;
-                // }
-                ///////////////////////////////////////////////////////End Runge-Kutta///////////////////////////////////////////////////////////////////
             }
+/**
+ *ZとZ1にx,yに偏差を与え時間を進めた結果の軌道、Xは微小量を与えていない場合の結果の軌道 
+*/
 
             if(t<t_end){
-                fprintf(outputfile, "%f  %f  \n", x, y);
+                fprintf(outputfile, "%f  %f  \n", x, y,-1);
+                // printf("after q2 : %f\n",q2);
+                // printf("t : %f\n",t);
+                // printf("x[0] : %f, x[1] : %f\n",X[0],X[1]);
+                // printf("x : %f, y : %f\n",x,y);
+                // printf("calculation aborted while SALI\n\n");
                 continue;
             }
+
+            // printf("after q2 : %f\n",q2);
+            // printf("x[0] : %f, x[1] : %f\n",X[0],X[1]);
 
             vector(X, Z, W1);
             vector(X, Z1, W2);
@@ -280,14 +230,12 @@ int main() {
             else {
                 SALI = norm_SALI1;
             }
-
+            // printf("x : %f, y : %f, SALI : %f\n\n",x,y, SALI);
             fprintf(outputfile, "%f  %f  %f\n", x, y, SALI);
 
-            y += x_step;
-            
         }
         fprintf(outputfile, "\n");
-        x += x_step;
+
     }
     printf("\n Finish simulation!!!!!!\n");
     fclose(outputfile);
@@ -315,4 +263,3 @@ int main() {
     //fprintf(myfile, "pause -1\n");
     return 0;
 }
-
