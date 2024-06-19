@@ -1,5 +1,5 @@
 /**
- * @file 
+ * @file
  * @brief 平面円制限三体問題（Planar Circular Restricted Three-Body Problem : PCRTBP）を扱うクラス
  * @author tabata
  * @date 2024/06/18
@@ -13,37 +13,36 @@
 #include <stdexcept>
 
 /**
-* @brief 平面円制限三体問題（PCRTBP）を扱うクラス
-* @details このクラスはPCRTBPのシミュレーションを行うための機能を提供
-*/
+ * @brief 平面円制限三体問題（PCRTBP）を扱うクラス
+ * @details このクラスはPCRTBPのシミュレーションを行うための機能を提供
+ */
 class PCRTBP
 {
 private:
     //! 状態変数
     double x[2], v[2], v_abs, c_jacobi;
-    double mu = 3.003e-6; 
-    double c[4] = 
-    {
-        1/(2*(2-std::pow(2,1.0/3.0))),
-        (1-std::pow(2,1.0/3.0))/(2*(2-std::pow(2,1.0/3.0))),
-        (1-std::pow(2,1.0/3.0))/(2*(2-std::pow(2,1.0/3.0))),
-        1/(2*(2-std::pow(2,1.0/3.0)))
-    };
-    double d[4] = 
-    {
-        1/(2-std::pow(2,1.0/3.0)),
-        -std::pow(2,1.0/3.0)/(2-std::pow(2,1.0/3.0)),
-        1/(2-std::pow(2,1.0/3.0)),
-        0.0
-    };
+    double mu = 3.003e-6;
+    double dt = 0.0001;
+    double c[4] =
+        {
+            1 / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+            (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+            (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+            1 / (2 * (2 - std::pow(2, 1.0 / 3.0)))};
+    double d[4] =
+        {
+            1 / (2 - std::pow(2, 1.0 / 3.0)),
+            -std::pow(2, 1.0 / 3.0) / (2 - std::pow(2, 1.0 / 3.0)),
+            1 / (2 - std::pow(2, 1.0 / 3.0)),
+            0.0};
 
 public:
     /**
-    * @brief コンストラクタ
-    * @param x 初期位置のx座標
-    * @param y 初期位置のy座標
-    * @param c_jacobi ヤコビ積分
-    */
+     * @brief コンストラクタ
+     * @param x 初期位置のx座標
+     * @param y 初期位置のy座標
+     * @param c_jacobi ヤコビ積分
+     */
     PCRTBP(double x, double y, double c_jacobi);
 
     double get_x() const;
@@ -66,8 +65,8 @@ PCRTBP::PCRTBP(double x, double y, double c_jacobi) : c_jacobi(c_jacobi)
     this->x[0] = x;
     this->x[1] = y;
 
-    double r1 = std::sqrt((x+mu)*(x+mu)+y*y); 
-    double r2 = std::sqrt((x-1+mu)*(x-1+mu)+y*y);
+    double r1 = std::sqrt((x + mu) * (x + mu) + y * y);
+    double r2 = std::sqrt((x - 1 + mu) * (x - 1 + mu) + y * y);
 
     if ((x * x + y * y + 2 * (1 - mu) / r1 + 2 * mu / r2 + mu * (1 - mu) - c_jacobi) < 0)
     {
@@ -104,7 +103,18 @@ double PCRTBP::calc_r2() const
 
 void PCRTBP::calc_symplectic()
 {
-    // シンプレクティック法による計算の実装
+    double x_buff0[4], x_buff1[4], x_buff2[4], x_buff3[4], x_buff4[4];
+    double q_buff0[4], q_buff1[4], q_buff2[4], q_buff3[4], q_buff4[4];
+    double bunbo1, bunbo2;
+
+    x_buff0[0] = x[0] + x[1] * dt * c[0] + q[0] * dt * c[0];
+    x_buff0[1] = x[1] - x[0] * dt * c[0] + q[1] * dt * c[0];
+
+    bunbo0 = std::pow(((x_buff0[0] + mu) * (x_buff0[0] + mu) + x_buff0[1] * x_buff0[1]), 3. / 2.);
+    bunbo1 = std::pow(((x_buff0[0] - 1 + mu) * (x_buff0[0] - 1 + mu) + x_buff0[1] * x_buff0[1]), 3. / 2.);
+
+    Z[2] = q[0] + q[1] * dt * d[0] - (1 - mu) * (x_buff0[0] + mu) / bunbo0 * dt * d[0] - mu * (x_buff0[0] - 1 + mu) / bunbo1 * dt * d[0];
+    Z[3] = q[1] - q[0] * dt * d[0] - (1 - mu) * (x_buff0[1]) / bunbo0 * dt * d[0] - mu * (x_buff0[1]) / bunbo1 * dt * d[0];
 }
 
 #endif // PCRTBP_H
