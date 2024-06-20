@@ -116,7 +116,7 @@ double PCRTBP::calc_r2() const
 
 void PCRTBP::calc_symplectic4()
 {
-    double x_buff0[2], x_buff1[2];
+    double x_buff0[2], ;
     double q_buff0[2], q_buff1[2];
 
 

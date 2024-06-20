@@ -197,7 +197,7 @@ int main() {
 */
 
             if(t<t_end){
-                fprintf(outputfile, "%f  %f  %d\n", x, y,-1);
+                fprintf(outputfile, "%f  %f  %d\n", x, y);
                 // printf("after q2 : %f\n",q2);
                 // printf("t : %f\n",t);
                 // printf("x[0] : %f, x[1] : %f\n",X[0],X[1]);
@@ -253,7 +253,7 @@ int main() {
     fprintf(myfile, "set size ratio 1 1\n");
     fprintf(myfile, "set xrange[0.99:1.01]\n");
     fprintf(myfile, "set yrange[-0.01:0.01]\n");
-    fprintf(myfile, "set cbrange[-1:1.45]\n");
+    fprintf(myfile, "set cbrange[0:1.6]\n");
     fprintf(myfile, "set xlabel 'x axis'\n");
     fprintf(myfile, "set ylabel 'y axis'\n");
     fprintf(myfile, "set cblabel 'SALI'\n");
