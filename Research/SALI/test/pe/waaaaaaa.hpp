@@ -19,36 +19,32 @@
 class PCRTBP
 {
 private:
-    //! x[2]:回転座標系におけるx,yの組, v[2] : 回転座標系におけるvx,vyの組, q[2]:一般化運動量vx-y,vy+xの組,
-    //! v_abs : 回転座標系における速度の大きさ, c_jacobi : や子微積分
-    double x[2], v[2], q[2],v_abs, c_jacobi;
-    int k;  //k=1:prograde motion, k=-1:retrograde motion
-    double mu = 3.003e-6; 
+    //! 状態変数
+    double x[2], v[2], v_abs, c_jacobi;
+    double mu = 3.003e-6;
     double dt = 0.0001;
-    double c[4] = 
-    {
-        1/(2*(2-std::pow(2,1.0/3.0))),
-        (1-std::pow(2,1.0/3.0))/(2*(2-std::pow(2,1.0/3.0))),
-        (1-std::pow(2,1.0/3.0))/(2*(2-std::pow(2,1.0/3.0))),
-        1/(2*(2-std::pow(2,1.0/3.0)))
-    };
-    double d[4] = 
-    {
-        1/(2-std::pow(2,1.0/3.0)),
-        -std::pow(2,1.0/3.0)/(2-std::pow(2,1.0/3.0)),
-        1/(2-std::pow(2,1.0/3.0)),
-        0.0
-    };
+    int k;
+    double c[4] =
+        {
+            1 / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+            (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+            (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+            1 / (2 * (2 - std::pow(2, 1.0 / 3.0)))};
+    double d[4] =
+        {
+            1 / (2 - std::pow(2, 1.0 / 3.0)),
+            -std::pow(2, 1.0 / 3.0) / (2 - std::pow(2, 1.0 / 3.0)),
+            1 / (2 - std::pow(2, 1.0 / 3.0)),
+            0.0};
 
 public:
     /**
-    * @brief コンストラクタ
-    * @param x 初期位置のx座標
-    * @param y 初期位置のy座標
-    * @param k 運動の種類 (1: prograde, -1: retrograde)
-    * @param c_jacobi ヤコビ積分
-    */
-    PCRTBP(double x, double y, int k, double c_jacobi);
+     * @brief コンストラクタ
+     * @param x 初期位置のx座標
+     * @param y 初期位置のy座標
+     * @param c_jacobi ヤコビ積分
+     */
+    PCRTBP(double x, double y, double c_jacobi,int k);
 
     double get_x() const;
     double get_y() const;
@@ -61,12 +57,13 @@ public:
 
     double calc_r1() const;
     double calc_r2() const;
-    void calc_symplectic4();
+    void calc_symplectic();
+    bool compareValueToThreshold() const;
 };
 
 // クラスメソッドの定義
 
-PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi) : k(k), c_jacobi(c_jacobi)
+PCRTBP::PCRTBP(double x, double y, double c_jacobi) : c_jacobi(c_jacobi), k(k)
 {
     this->x[0] = x;
     this->x[1] = y;
@@ -74,19 +71,16 @@ PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi) : k(k), c_jacobi(c_ja
     double r1 = std::sqrt((x + mu) * (x + mu) + y * y);
     double r2 = std::sqrt((x - 1 + mu) * (x - 1 + mu) + y * y);
 
-    double velocity_term = x * x + y * y + 2 * (1 - mu) / r1 + 2 * mu / r2 + mu * (1 - mu) - c_jacobi;
-    if (velocity_term < 0)
+    if ((x * x + y * y + 2 * (1 - mu) / r1 + 2 * mu / r2 + mu * (1 - mu) - c_jacobi) < 0)
     {
-        throw std::runtime_error("Absolute value of the velocity has a negative value");
-    }
-    else
+        throw std::runtime_error("absolute value of the velocity has negative value");
+    }else
     {
-        v_abs = std::sqrt(velocity_term);
-        this->v[0] = -k * v_abs * y / r2;
-        this->v[1] = k * v_abs * (x - 1 + mu) / r2;
-        this->q[0] = v[0]-x[1];
-        this->q[1] = v[1]+x[0];
+        v_abs = std::sqrt(x * x + y * y + 2 * (1 - mu) / r1 + 2 * mu / r2 + mu * (1 - mu) - c_jacobi)
+        this->v[0] = k*v_abs*x[1]/r2
     }
+    
+
 }
 
 double PCRTBP::get_x() const { return x[0]; }
@@ -102,7 +96,8 @@ void PCRTBP::set_x(double x, double y)
 
 void PCRTBP::set_v()
 {
-    // 速度の設定に関する実装が必要な場合に追加
+    // 速度の設定に関する実装
+    // 要る？
 }
 
 void PCRTBP::set_dt(double dt)
