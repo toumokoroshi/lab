@@ -18,14 +18,14 @@ double Y[4], Z[4], Z1[4], K[4][6];
 double X[4];
 double mu = 3.003e-6;
 double t_end = 10;
-double dt = 0.0001;
+double dt = 0.001;
 double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
 double x_min = 0.99;
 double x_max = 1.01;
 double x_step = 0.0001;
-double C = 3.000201;
+double C = 2.999902;
 double y_min, y_max;
 double k = -1;  ///////k=1:prograde motion, k=-1:retrograde motion
 double q1, q2;

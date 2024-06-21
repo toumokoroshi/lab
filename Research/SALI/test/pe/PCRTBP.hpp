@@ -5,8 +5,8 @@
  * @date 2024/06/18
  */
 
-#ifndef PCRTBP_H
-#define PCRTBP_H
+#ifndef PCRTBP_H_
+#define PCRTBP_H_
 
 #include <cmath>
 #include <iostream>
@@ -19,12 +19,23 @@
 class PCRTBP
 {
 private:
-    //! x[2]:回転座標系におけるx,yの組, v[2] : 回転座標系におけるvx,vyの組, q[2]:一般化運動量vx-y,vy+xの組,
-    //! v_abs : 回転座標系における速度の大きさ, c_jacobi : や子微積分
-    double x[2], v[2], q[2],v_abs, c_jacobi;
-    int k;  //k=1:prograde motion, k=-1:retrograde motion
-    double mu = 3.003e-6; 
-    double dt = 0.0001;
+    //! x[2]:回転座標系におけるx,yの組 , 
+    double x[2];
+    //! v[2] : 回転座標系におけるvx,vyの組
+    double v[2];
+    //! q[2]:一般化運動量vx-y,vy+xの組
+    double q[2];
+    //! v_abs : 回転座標系における速度の大きさ, 
+    double v_abs;
+    //! c_jacobi : や子微積分
+    double c_jacobi;
+    //! k=1:prograde motion, k=-1:retrograde motion
+    int k;  
+    //!ratio of M_earth and M_earth+M_sun
+    double mu;
+    //! time step for integration 
+    double dt;
+    //coeficient c in forth order symplectic method 
     double c[4] = 
     {
         1/(2*(2-std::pow(2,1.0/3.0))),
@@ -32,6 +43,7 @@ private:
         (1-std::pow(2,1.0/3.0))/(2*(2-std::pow(2,1.0/3.0))),
         1/(2*(2-std::pow(2,1.0/3.0)))
     };
+    //coeficient d in forth order symplectic method 
     double d[4] = 
     {
         1/(2-std::pow(2,1.0/3.0)),
@@ -54,32 +66,31 @@ public:
     double get_y() const;
     double get_vx() const;
     double get_vy() const;
+    double get_q0() const;
+    double get_q1() const;
+    double get_mu() const;
+    double get_dt() const;
+    double get_xvec() const;
 
     void set_x(double x, double y);
-    void set_v();
+    void set_v();// 未実装のため保留
     void set_dt(double dt);
 
     double calc_r1() const;
     double calc_r2() const;
-    void calc_symplectic4();
+    void symplectic_integration_step();
 };
 
-// クラスメソッドの定義
-
-PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi) : k(k), c_jacobi(c_jacobi)
-{
-    this->x[0] = x;
-    this->x[1] = y;
+PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi) 
+    : k(k), c_jacobi(c_jacobi), x{x, y}, mu(3.003e-6), dt(0.0001) {
 
     double r1 = std::sqrt((x + mu) * (x + mu) + y * y);
     double r2 = std::sqrt((x - 1 + mu) * (x - 1 + mu) + y * y);
 
     double velocity_term = x * x + y * y + 2 * (1 - mu) / r1 + 2 * mu / r2 + mu * (1 - mu) - c_jacobi;
-    if (velocity_term < 0)
-    {
-        throw std::runtime_error("Absolute value of the velocity has a negative value");
-    }
-    else
+    if (velocity_term < 0) {
+        throw std::runtime_error("Absolute value of the velocity has a negative value: " + std::to_string(velocity_term));
+    } else
     {
         v_abs = std::sqrt(velocity_term);
         this->v[0] = -k * v_abs * y / r2;
@@ -93,6 +104,11 @@ double PCRTBP::get_x() const { return x[0]; }
 double PCRTBP::get_y() const { return x[1]; }
 double PCRTBP::get_vx() const { return v[0]; }
 double PCRTBP::get_vy() const { return v[1]; }
+double PCRTBP::get_q0() const { return q[0]; }
+double PCRTBP::get_q1() const { return q[1]; }
+double PCRTBP::get_mu() const { return mu; }
+double PCRTBP::get_dt() const { return dt; }
+double PCRTBP::get_xvec() const { return x; }
 
 void PCRTBP::set_x(double x, double y)
 {
@@ -120,7 +136,7 @@ double PCRTBP::calc_r2() const
     return std::sqrt((x[0] - 1 + mu) * (x[0] - 1 + mu) + x[1] * x[1]);
 }
 
-void PCRTBP::calc_symplectic()
+void PCRTBP::symplectic_integration_step()
 {
     double x_buff0[4], x_buff1[4];
     double q_buff0[4], q_buff1[4];
@@ -163,14 +179,14 @@ void PCRTBP::calc_symplectic()
 
     //loop4
     //buff0からbuff1に値を更新
-    x_buff1[0] = x_buff0[0] + x_buff0[1] * dt * c[1] + q_buff0[0] * dt * c[1];
-    x_buff1[1] = x_buff0[1] - x_buff0[0] * dt * c[1] + q_buff0[1] * dt * c[1];
+    x_buff1[0] = x_buff0[0] + x_buff0[1] * dt * c[3] + q_buff0[0] * dt * c[3];
+    x_buff1[1] = x_buff0[1] - x_buff0[0] * dt * c[3] + q_buff0[1] * dt * c[3];
 
     bunbo0 = std::pow(((x_buff1[0] + mu) * (x_buff1[0] + mu) + x_buff1[1] * x_buff1[1]), 3. / 2.);
     bunbo1 = std::pow(((x_buff1[0] - 1 + mu) * (x_buff1[0] - 1 + mu) + x_buff1[1] * x_buff1[1]), 3. / 2.);
 
-    q_buff1[0] = q_buff0[0] + q_buff0[1] * dt * d[1] - (1 - mu) * (x_buff1[0] + mu) / bunbo0 * dt * d[1] - mu * (x_buff1[0] - 1 + mu) / bunbo1 * dt * d[1];
-    q_buff1[1] = q_buff0[1] - q_buff0[0] * dt * d[1] - (1 - mu) * (x_buff1[1]) / bunbo0 * dt * d[1] - mu * (x_buff1[1]) / bunbo1 * dt * d[1];
+    q_buff1[0] = q_buff0[0] + q_buff0[1] * dt * d[3] - (1 - mu) * (x_buff1[0] + mu) / bunbo0 * dt * d[3] - mu * (x_buff1[0] - 1 + mu) / bunbo1 * dt * d[3];
+    q_buff1[1] = q_buff0[1] - q_buff0[0] * dt * d[3] - (1 - mu) * (x_buff1[1]) / bunbo0 * dt * d[3] - mu * (x_buff1[1]) / bunbo1 * dt * d[3];
 
     x[0]=x_buff1[0];
     x[1]=x_buff1[1];
