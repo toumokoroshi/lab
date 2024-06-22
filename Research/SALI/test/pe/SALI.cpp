@@ -26,8 +26,8 @@
 
 void progressBar(int progress, int total);
 std::string getCurrentDateTime();
-double *calc_deviation_vector(double input_vector0[2], double input_vector1[2]);
-double *calc_unit_vector(double input_vector[2]);
+void calc_deviation_vector(double input_vector0[2], double input_vector1[2],double output_vector[2]);
+void calc_unit_vector(double input_vector[2],double output_vector[2]);
 double calc_norm(double input_vector[2]);
 
 int main()
@@ -70,6 +70,8 @@ int main()
         double y_min = -y_max;
         int y_mesh_size = (int)std::round((y_max - y_min) / x_step);
 
+        init_y = y_min;
+
         for (int yloop_counter = 0; yloop_counter < y_mesh_size; ++yloop_counter)
         {
             PCRTBP pcrtbp0(init_x, init_y, k, C_jacobi);
@@ -106,18 +108,18 @@ int main()
                 continue;
             }
 
-            double *dev_vec0;
-            double *dev_vec1;
-            dev_vec0 = calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp1.get_xvec());
-            dev_vec1 = calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp2.get_xvec());
+            double dev_vec0[2] = {0};
+            double dev_vec1[2] = {0};
+            calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp1.get_xvec(), dev_vec0);
+            calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp2.get_xvec(),dev_vec1);
 
-            double *dev_vec_unit0;
-            double *dev_vec_unit1;
-            dev_vec_unit0 = calc_unit_vector(dev_vec0);
-            dev_vec_unit1 = calc_unit_vector(dev_vec1);
+            double dev_vec_unit0[2] = {0};
+            double dev_vec_unit1[2] = {0};
+            calc_unit_vector(dev_vec0, dev_vec_unit0);
+            calc_unit_vector(dev_vec1, dev_vec_unit1);
 
-            double SALI0[2];
-            double SALI1[2];
+            double SALI0[2] = {0};
+            double SALI1[2] = {0};
 
             for (int i; i < 2; i++)
             {
@@ -170,7 +172,7 @@ int main()
     fprintf(myfile, "set cblabel 'SALI'\n");
     fprintf(myfile, "set pm3d map\n");
     fprintf(myfile, "set terminal png\n");
-    fprintf(myfile, "set output 'k= %f ,C= %f _new1.png'\n", k, c_jacobi);
+    fprintf(myfile, "set output 'k= %d ,C= %f _new1.png'\n", k, C_jacobi);
     fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
     fprintf(myfile, "splot %s with p\n", fileName.c_str());
 
@@ -214,25 +216,20 @@ std::string getCurrentDateTime()
     return oss.str();
 }
 
-double *calc_deviation_vector(double input_vector0[2], double input_vector1[2])
+void calc_deviation_vector(double input_vector0[2], double input_vector1[2],double output_vector[2])
 {
-    double w[2];
-
-    w[0] = input_vector0[0] - input_vector1[0];
-    w[1] = input_vector0[1] - input_vector1[1];
-
-    return w;
+    output_vector[0] = input_vector0[0] - input_vector1[0];
+    output_vector[1] = input_vector0[1] - input_vector1[1];
+    return;
 }
-
-double *calc_unit_vector(double input_vector[2])
+void calc_unit_vector(double input_vector[2],double output_vector[2])
 {
-    double output_vector[2];
     double n = calc_norm(input_vector);
     for (int i = 0; i < 2; i++)
     {
         output_vector[i] = input_vector[i] / n;
     }
-    return output_vector;
+    return;
 }
 
 double calc_norm(double input_vector[2])
