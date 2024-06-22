@@ -26,8 +26,8 @@
 
 void progressBar(int progress, int total);
 std::string getCurrentDateTime();
-double calc_deviation_vector(double input_vector1, double input_vector2[2]);
-double calc_unit_vector(double input_vector[2]);
+double *calc_deviation_vector(double input_vector0[2], double input_vector1[2]);
+double *calc_unit_vector(double input_vector[2]);
 double calc_norm(double input_vector[2]);
 
 int main()
@@ -170,7 +170,7 @@ int main()
     fprintf(myfile, "set cblabel 'SALI'\n");
     fprintf(myfile, "set pm3d map\n");
     fprintf(myfile, "set terminal png\n");
-    fprintf(myfile, "set output 'k= %f ,C= %f _new1.png'\n", k, C);
+    fprintf(myfile, "set output 'k= %f ,C= %f _new1.png'\n", k, c_jacobi);
     fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
     fprintf(myfile, "splot %s with p\n", fileName.c_str());
 
@@ -214,17 +214,17 @@ std::string getCurrentDateTime()
     return oss.str();
 }
 
-double calc_deviation_vector(double input_vector1[2], double input_vector2[2])
+double *calc_deviation_vector(double input_vector0[2], double input_vector1[2])
 {
     double w[2];
-    for (int i = 0; i < 2; i++)
-    {
-        w[i] = input_vector1[i] - input_vector2[i];
-    }
+
+    w[0] = input_vector0[0] - input_vector1[0];
+    w[1] = input_vector0[1] - input_vector1[1];
+
     return w;
 }
 
-double calc_unit_vector(double input_vector[2])
+double *calc_unit_vector(double input_vector[2])
 {
     double output_vector[2];
     double n = calc_norm(input_vector);
