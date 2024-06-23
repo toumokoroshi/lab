@@ -35,7 +35,7 @@ int main()
     constexpr double epsilon = 1.0e-10;
     constexpr double mu = 3.003e-6;
     constexpr int k = -1;
-    constexpr double C_jacobi = 3.000201;
+    constexpr double C_jacobi = 3.0000201;
     constexpr double Influence_sphere_radius = 0.03;
     constexpr double forbidden_area_radius = 0.00007;
 
@@ -54,13 +54,13 @@ int main()
               << std::endl;
 
     double init_x;
-    double x_min = 1;
-    double x_max = 1;
+    double x_min = 1.00;
+    double x_max = 1.00;
     double x_step = 0.0001;
 
     init_x = x_min;
 
-    int x_mesh_size = (int)std::round((x_max - x_min) / x_step) + 1;
+    int x_mesh_size = (int)std::round((x_max - x_min) / x_step);
 
     for (int xloop_counter = 0; xloop_counter < x_mesh_size; ++xloop_counter)
     {
@@ -68,10 +68,9 @@ int main()
         progressBar(xloop_counter, x_mesh_size);
 
         double init_y;
-        // double y_max = std::sqrt(0.01 * 0.01 - (init_x - 1 + mu) * (init_x - 1 + mu));
-        double y_max = 0.0001;
+        double y_max = std::sqrt(0.01 * 0.01 - (init_x - 1 + mu) * (init_x - 1 + mu));
         double y_min = 0;
-        int y_mesh_size = (int)std::round((y_max - y_min) / x_step) + 1;
+        int y_mesh_size = (int)std::round((y_max - y_min) / x_step);
 
         init_y = y_min;
 
@@ -82,20 +81,12 @@ int main()
             PCRTBP pcrtbp2(init_x, init_y, k + epsilon, C_jacobi);
 
             double r2 = pcrtbp0.calc_r2();
+
             if (r2 < forbidden_area_radius)
             {
                 init_y += x_step;
                 continue;
             }
-
-            /*debug codes start from here */
-
-            std::cout << " initial x = " << init_x << "\n"
-                      << " initial y = " << init_y << std::endl;
-            std::cout << " initial r2 = " << r2 << "\n"
-                      << std::endl;
-
-            /*debug codes end here */
 
             double t = 0.0;
             double t_end = 10;
@@ -105,14 +96,6 @@ int main()
             {
                 t += dt;
                 r2 = pcrtbp0.calc_r2();
-                /*debug codes start from here */
-
-                std::cout << " x = " << pcrtbp0.get_x() << "\n"
-                          << " y = " << pcrtbp0.get_y() << std::endl;
-                std::cout << " t = " << t << "\n"
-                          << std::endl;
-
-                /*debug codes end here */
                 if (r2 < forbidden_area_radius || r2 > Influence_sphere_radius)
                 {
                     break;
@@ -125,15 +108,6 @@ int main()
             if (t < t_end)
             {
                 // outFile << init_x << " " << init_y << " " << -1 << std::endl;
-                /*debug codes start from here */
-
-                std::cout << " after x = " << pcrtbp0.get_x() << "\n"
-                          << " after y = " << pcrtbp0.get_y() << std::endl;
-                std::cout << " after r2 = " << r2 << std::endl;
-                std::cout << " after t = " << t << "\n"
-                          << std::endl;
-
-                /*debug codes end here */
                 init_y += x_step;
                 continue;
             }
@@ -143,15 +117,6 @@ int main()
             calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp1.get_xvec(), dev_vec0);
             calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp2.get_xvec(), dev_vec1);
 
-            /*debug codes start from here */
-
-            std::cout << " dev_vec0 = " << dev_vec0[0] << ", " << dev_vec0[1] << "\n"
-                      << " dev_vec1 = " << dev_vec1[0] << ", " << dev_vec1[1] << std::endl;
-            std::cout << " after r2 = " << r2 << std::endl;
-            std::cout << " after t = " << t << "\n"
-                      << std::endl;
-
-            /*debug codes end here */
             double dev_vec_unit0[2] = {0};
             double dev_vec_unit1[2] = {0};
             calc_unit_vector(dev_vec0, dev_vec_unit0);
@@ -170,17 +135,7 @@ int main()
             double norm_SALI1 = calc_norm(SALI1);
 
             double SALI;
-            SALI = (norm_SALI0 > norm_SALI1) ? norm_SALI1 : norm_SALI0;
-
-            /*debug codes start from here */
-
-            std::cout << " after x = " << pcrtbp0.get_x() << "\n"
-                      << " after y = " << pcrtbp0.get_y() << std::endl;
-            std::cout << " after r2 = " << r2 << std::endl;
-            std::cout << " after SALI = " << SALI << "\n"
-                      << std::endl;
-
-            /*debug codes end here */
+            SALI = (norm_SALI0 > norm_SALI1) ? norm_SALI0 : norm_SALI1;
 
             // outFile << init_x << " " << init_y << " " << SALI << std::endl;
             // outFile << pcrtbp0.get_x() << " " << pcrtbp0.get_y() << std::endl;

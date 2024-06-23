@@ -97,8 +97,8 @@ PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi)
         v_abs = std::sqrt(velocity_term);
         this->v[0] = -k * v_abs * y / r2;
         this->v[1] = k * v_abs * (x - 1 + mu) / r2;
-        this->q[0] = v[0] - x;
-        this->q[1] = v[1] + y;
+        this->q[0] = v[0] - y;
+        this->q[1] = v[1] + x;
     }
 }
 
@@ -149,47 +149,47 @@ void PCRTBP::symplectic_integration_step()
 
     // loop1
     // 初期値からbuff0に値を更新
-    x_buff0[0] = x[0] + x[1] * dt * c[0] + q[0] * dt * c[0];
-    x_buff0[1] = x[1] - x[0] * dt * c[0] + q[1] * dt * c[0];
+    x_buff0[0] = x[0] + (x[1] + q[0]) * dt * c[0];
+    x_buff0[1] = x[1] + (-x[0] + q[1]) * dt * c[0];
 
     bunbo0 = std::pow(((x_buff0[0] + mu) * (x_buff0[0] + mu) + x_buff0[1] * x_buff0[1]), 3. / 2.);
     bunbo1 = std::pow(((x_buff0[0] - 1 + mu) * (x_buff0[0] - 1 + mu) + x_buff0[1] * x_buff0[1]), 3. / 2.);
 
-    q_buff0[0] = q[0] + q[1] * dt * d[0] - (1 - mu) * (x_buff0[0] + mu) / bunbo0 * dt * d[0] - mu * (x_buff0[0] - 1 + mu) / bunbo1 * dt * d[0];
-    q_buff0[1] = q[1] - q[0] * dt * d[0] - (1 - mu) * (x_buff0[1]) / bunbo0 * dt * d[0] - mu * (x_buff0[1]) / bunbo1 * dt * d[0];
+    q_buff0[0] = q[0] + (q[1] - (1 - mu) * (x_buff0[0] + mu) / bunbo0 - mu * (x_buff0[0] - 1 + mu) / bunbo1) * dt * d[0];
+    q_buff0[1] = q[1] + (-q[0] - (1 - mu) * (x_buff0[1]) / bunbo0 - mu * (x_buff0[1]) / bunbo1) * dt * d[0];
 
     // loop2
     // buff0からbuff1に値を更新
-    x_buff1[0] = x_buff0[0] + x_buff0[1] * dt * c[1] + q_buff0[0] * dt * c[1];
-    x_buff1[1] = x_buff0[1] - x_buff0[0] * dt * c[1] + q_buff0[1] * dt * c[1];
+    x_buff1[0] = x_buff0[0] + (x_buff0[1] + q_buff0[0]) * dt * c[1];
+    x_buff1[1] = x_buff0[1] + (-x_buff0[0] + q_buff0[1]) * dt * c[1];
 
     bunbo0 = std::pow(((x_buff1[0] + mu) * (x_buff1[0] + mu) + x_buff1[1] * x_buff1[1]), 3. / 2.);
     bunbo1 = std::pow(((x_buff1[0] - 1 + mu) * (x_buff1[0] - 1 + mu) + x_buff1[1] * x_buff1[1]), 3. / 2.);
 
-    q_buff1[0] = q_buff0[0] + q_buff0[1] * dt * d[1] - (1 - mu) * (x_buff1[0] + mu) / bunbo0 * dt * d[1] - mu * (x_buff1[0] - 1 + mu) / bunbo1 * dt * d[1];
-    q_buff1[1] = q_buff0[1] - q_buff0[0] * dt * d[1] - (1 - mu) * (x_buff1[1]) / bunbo0 * dt * d[1] - mu * (x_buff1[1]) / bunbo1 * dt * d[1];
+    q_buff1[0] = q_buff0[0] + (q_buff0[1] - (1 - mu) * (x_buff1[0] + mu) / bunbo0 - mu * (x_buff1[0] - 1 + mu) / bunbo1) * dt * d[1];
+    q_buff1[1] = q_buff0[1] + (-q_buff0[0] - (1 - mu) * (x_buff1[1]) / bunbo0 - mu * (x_buff1[1]) / bunbo1) * dt * d[1];
 
     // loop3
     // buff1からbuff0に値を更新
-    x_buff0[0] = x_buff1[0] + x_buff1[1] * dt * c[2] + q_buff1[0] * dt * c[2];
-    x_buff0[1] = x_buff1[1] - x_buff1[0] * dt * c[2] + q_buff1[1] * dt * c[2];
+    x_buff0[0] = x_buff1[0] + (x_buff1[1] + q_buff1[0]) * dt * c[2];
+    x_buff0[1] = x_buff1[1] + (-x_buff1[0] + q_buff1[1]) * dt * c[2];
 
     bunbo0 = std::pow(((x_buff0[0] + mu) * (x_buff0[0] + mu) + x_buff0[1] * x_buff0[1]), 3. / 2.);
     bunbo1 = std::pow(((x_buff0[0] - 1 + mu) * (x_buff0[0] - 1 + mu) + x_buff0[1] * x_buff0[1]), 3. / 2.);
 
-    q_buff0[0] = q_buff1[0] + q_buff1[1] * dt * d[2] - (1 - mu) * (x_buff0[0] + mu) / bunbo0 * dt * d[2] - mu * (x_buff0[0] - 1 + mu) / bunbo1 * dt * d[2];
-    q_buff0[1] = q_buff1[1] - q_buff1[0] * dt * d[2] - (1 - mu) * (x_buff0[1]) / bunbo0 * dt * d[2] - mu * (x_buff0[1]) / bunbo1 * dt * d[2];
+    q_buff0[0] = q_buff1[0] + (q_buff1[1] - (1 - mu) * (x_buff0[0] + mu) / bunbo0 - mu * (x_buff0[0] - 1 + mu) / bunbo1) * dt * d[2];
+    q_buff0[1] = q_buff1[1] + (-q_buff1[0] - (1 - mu) * (x_buff0[1]) / bunbo0 - mu * (x_buff0[1]) / bunbo1) * dt * d[2];
 
     // loop4
     // buff0からbuff1に値を更新
-    x_buff1[0] = x_buff0[0] + x_buff0[1] * dt * c[3] + q_buff0[0] * dt * c[3];
-    x_buff1[1] = x_buff0[1] - x_buff0[0] * dt * c[3] + q_buff0[1] * dt * c[3];
+    x_buff1[0] = x_buff0[0] + (x_buff0[1] + q_buff0[0]) * dt * c[3];
+    x_buff1[1] = x_buff0[1] + (-x_buff0[0] + q_buff0[1]) * dt * c[3];
 
     bunbo0 = std::pow(((x_buff1[0] + mu) * (x_buff1[0] + mu) + x_buff1[1] * x_buff1[1]), 3. / 2.);
     bunbo1 = std::pow(((x_buff1[0] - 1 + mu) * (x_buff1[0] - 1 + mu) + x_buff1[1] * x_buff1[1]), 3. / 2.);
 
-    q_buff1[0] = q_buff0[0] + q_buff0[1] * dt * d[3] - (1 - mu) * (x_buff1[0] + mu) / bunbo0 * dt * d[3] - mu * (x_buff1[0] - 1 + mu) / bunbo1 * dt * d[3];
-    q_buff1[1] = q_buff0[1] - q_buff0[0] * dt * d[3] - (1 - mu) * (x_buff1[1]) / bunbo0 * dt * d[3] - mu * (x_buff1[1]) / bunbo1 * dt * d[3];
+    q_buff1[0] = q_buff0[0] + (q_buff0[1] - (1 - mu) * (x_buff1[0] + mu) / bunbo0 - mu * (x_buff1[0] - 1 + mu) / bunbo1) * dt * d[3];
+    q_buff1[1] = q_buff0[1] + (-q_buff0[0] - (1 - mu) * (x_buff1[1]) / bunbo0 - mu * (x_buff1[1]) / bunbo1) * dt * d[3];
 
     x[0] = x_buff1[0];
     x[1] = x_buff1[1];
