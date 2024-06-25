@@ -81,7 +81,7 @@ public:
 };
 
 PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi)
-    : x{x, y}, c_jacobi(c_jacobi), k(k), mu(3.003e-6), dt(0.0001)
+    : x{x, y}, c_jacobi(c_jacobi), k(k), mu(3.003e-6), dt(0.001)
 {
 
     double r1 = std::sqrt((x + mu) * (x + mu) + y * y);
@@ -145,7 +145,6 @@ void PCRTBP::symplectic_integration_step()
     double q_buff0[4], q_buff1[4];
     double bunbo0, bunbo1;
 
-    // 試しになるべく括弧と乗算を減らす形にしてみる
 
     // loop1
     // 初期値からbuff0に値を更新
@@ -195,6 +194,8 @@ void PCRTBP::symplectic_integration_step()
     x[1] = x_buff1[1];
     q[0] = q_buff1[0];
     q[1] = q_buff1[1];
+    v[0] = q_buff1[0] + x_buff1[1];
+    v[1] = q_buff1[1] - x_buff1[0];
 }
 
 #endif // PCRTBP_H

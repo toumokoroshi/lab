@@ -50,8 +50,8 @@ int main()
     // }
 
     std::cout << "\n"
-              << "simulating ... " << "\n"
-              << std::endl;
+        << "simulating ... " << "\n"
+        << std::endl;
 
     double init_x;
     double x_min = 1;
@@ -90,15 +90,15 @@ int main()
 
             /*debug codes start from here */
 
-            std::cout << " initial x = " << init_x << "\n"
-                      << " initial y = " << init_y << std::endl;
-            std::cout << " initial r2 = " << r2 << "\n"
-                      << std::endl;
+            pcrtbp0.set_dt(0.001);
+            std::cout << " initial x ,initial y, initial r2 : " << init_x << ", " << init_y << ", " << r2 << std::endl;
+            std::cout << "initial vx , initial vy = " << pcrtbp0.get_vx() << ", " << pcrtbp0.get_vy() << std::endl;
+            std::cout << "q0 , q1 : " << pcrtbp0.get_q0() << ", " << pcrtbp0.get_q1() << "\n" << std::endl;
 
             /*debug codes end here */
 
             double t = 0.0;
-            double t_end = 10;
+            double t_end = 0.01;
             double dt = pcrtbp0.get_dt();
 
             while (t < t_end)
@@ -107,10 +107,11 @@ int main()
                 r2 = pcrtbp0.calc_r2();
                 /*debug codes start from here */
 
-                std::cout << " x = " << pcrtbp0.get_x() << "\n"
-                          << " y = " << pcrtbp0.get_y() << std::endl;
-                std::cout << " t = " << t << "\n"
-                          << std::endl;
+                std::cout << " t = " << t << std::endl;
+                std::cout << " x , y, r2 : " << pcrtbp0.get_x() << ", " << pcrtbp0.get_y() << ", " << r2 << std::endl;
+                std::cout << "vx , vy : " << pcrtbp0.get_vx() << ", " << pcrtbp0.get_vy() << std::endl;
+                std::cout << "q0 , q1 : " << pcrtbp0.get_q0() << ", " << pcrtbp0.get_q1() << "\n" << std::endl;
+
 
                 /*debug codes end here */
                 if (r2 < forbidden_area_radius || r2 > Influence_sphere_radius)
@@ -118,8 +119,8 @@ int main()
                     break;
                 }
                 pcrtbp0.symplectic_integration_step();
-                pcrtbp1.symplectic_integration_step();
-                pcrtbp2.symplectic_integration_step();
+                // pcrtbp1.symplectic_integration_step();
+                // pcrtbp2.symplectic_integration_step();
             }
 
             if (t < t_end)
@@ -127,38 +128,38 @@ int main()
                 // outFile << init_x << " " << init_y << " " << -1 << std::endl;
                 /*debug codes start from here */
 
-                std::cout << " after x = " << pcrtbp0.get_x() << "\n"
-                          << " after y = " << pcrtbp0.get_y() << std::endl;
+                std::cout << " after x = " << pcrtbp0.get_x() << ", after y = " << pcrtbp0.get_y() << std::endl;
                 std::cout << " after r2 = " << r2 << std::endl;
+                std::cout << "after vx = " << pcrtbp0.get_vx() << ", after vy = " << pcrtbp0.get_vy() << std::endl;
                 std::cout << " after t = " << t << "\n"
-                          << std::endl;
+                    << std::endl;
 
                 /*debug codes end here */
                 init_y += x_step;
                 continue;
             }
 
-            double dev_vec0[2] = {0};
-            double dev_vec1[2] = {0};
+            double dev_vec0[2] = { 0 };
+            double dev_vec1[2] = { 0 };
             calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp1.get_xvec(), dev_vec0);
             calc_deviation_vector(pcrtbp0.get_xvec(), pcrtbp2.get_xvec(), dev_vec1);
 
             /*debug codes start from here */
 
-            std::cout << " dev_vec0 = " << dev_vec0[0] << ", " << dev_vec0[1] << "\n"
-                      << " dev_vec1 = " << dev_vec1[0] << ", " << dev_vec1[1] << std::endl;
-            std::cout << " after r2 = " << r2 << std::endl;
-            std::cout << " after t = " << t << "\n"
-                      << std::endl;
+            // std::cout << " dev_vec0 = " << dev_vec0[0] << ", " << dev_vec0[1] << "\n"
+            //     << " dev_vec1 = " << dev_vec1[0] << ", " << dev_vec1[1] << std::endl;
+            // std::cout << " after r2 = " << r2 << std::endl;
+            // std::cout << " after t = " << t << "\n"
+            //     << std::endl;
 
             /*debug codes end here */
-            double dev_vec_unit0[2] = {0};
-            double dev_vec_unit1[2] = {0};
+            double dev_vec_unit0[2] = { 0 };
+            double dev_vec_unit1[2] = { 0 };
             calc_unit_vector(dev_vec0, dev_vec_unit0);
             calc_unit_vector(dev_vec1, dev_vec_unit1);
 
-            double SALI0[2] = {0};
-            double SALI1[2] = {0};
+            double SALI0[2] = { 0 };
+            double SALI1[2] = { 0 };
 
             for (int i; i < 2; i++)
             {
@@ -174,11 +175,12 @@ int main()
 
             /*debug codes start from here */
 
-            std::cout << " after x = " << pcrtbp0.get_x() << "\n"
-                      << " after y = " << pcrtbp0.get_y() << std::endl;
+            std::cout << " after x = " << pcrtbp0.get_x() << ", after y = " << pcrtbp0.get_y() << std::endl;
             std::cout << " after r2 = " << r2 << std::endl;
+            std::cout << "after vx = " << pcrtbp0.get_vx() << ", after vy = " << pcrtbp0.get_vy() << std::endl;
+            std::cout << " after t = " << t << std::endl;
             std::cout << " after SALI = " << SALI << "\n"
-                      << std::endl;
+                << std::endl;
 
             /*debug codes end here */
 
@@ -192,7 +194,7 @@ int main()
 
     // outFile.close();
     std::cout << "\n"
-              << "Simulation finished" << std::endl;
+        << "Simulation finished" << std::endl;
 
     // // gnuplotコマンドを使うためにファイルを開く
     // FILE *myfile = popen("gnuplot -persist", "w");
@@ -269,7 +271,7 @@ std::string getCurrentDateTime()
 {
     // 現在の時刻を取得
     std::time_t now = std::time(nullptr);
-    std::tm *ltm = std::localtime(&now);
+    std::tm* ltm = std::localtime(&now);
 
     // 日付時刻をフォーマット
     std::ostringstream oss;

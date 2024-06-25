@@ -18,7 +18,7 @@ double Y[4], Z[4], Z1[4], K[4][6];
 double X[4];
 double mu = 3.003e-6;
 double t_end = 10;
-double dt = 0.0001;
+double dt = 0.001;
 double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
@@ -31,7 +31,6 @@ double k = -1;  ///////k=1:prograde motion, k=-1:retrograde motion
 double q1, q2;
 double x, y, vy, vx;
 double V;
-int count;
 int i, j = 0;
 double c1=1/(2*(2-pow(2,1/3)));
 double c2=(1-pow(2,1/3))/(2*(2-pow(2,1/3)));
@@ -114,6 +113,8 @@ int main() {
 
     int x_mesh_size = (int)round((x_max-x_min)/x_step)+1;
 
+    x = x_min;
+
     for (int xloop_counter = 0; xloop_counter < x_mesh_size; xloop_counter++) {
 
         printf("\b\b\b\b\b\b\b\b\b\b\b");
@@ -121,9 +122,10 @@ int main() {
         y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
         y_min = -y_max;
 
+        y = y_min;
         int y_mesh_size = (int)round((y_max-y_min)/x_step)+1;
         
-        #pragma omp parallel for private(q1, q2, X, Y, Z, Z1, W1, W2, norm1, norm2, UV1, UV2, SALI1, SALI2)
+        // #pragma omp parallel for private(q1, q2, X, Y, Z, Z1, W1, W2, norm1, norm2, UV1, UV2, SALI1, SALI2)
         for (int yloop_counter = 0; yloop_counter < y_mesh_size; yloop_counter++) {
             q1 = distance1(x, y);
             q2 = distance2(x, y);
@@ -134,7 +136,7 @@ int main() {
                 continue;
             }
             else if ((x * x + y * y + 2 * (1 - mu) / q1 + 2 * mu / q2 + mu * (1 - mu) - C) < 0) {   ////////Out of ZVC
-                #pragma omp critical
+                // #pragma omp critical
                 y += x_step;
                 continue;
             }
@@ -236,7 +238,7 @@ int main() {
             }
             // printf("x : %f, y : %f, SALI : %f\n\n",x,y, SALI);
             fprintf(outputfile, "%f  %f  %f\n", x, y, SALI);
-            #pragma omp critical
+            // #pragma omp critical
             y += x_step;
         }
         fprintf(outputfile, "\n");
@@ -263,7 +265,7 @@ int main() {
     fprintf(myfile, "set cblabel 'SALI'\n");
     fprintf(myfile, "set pm3d map\n");
     fprintf(myfile, "set terminal png\n");
-    fprintf(myfile, "set output 'k= %f ,C= %f _new1.png'\n", k, C);
+    fprintf(myfile, "set output 'k= %f ,C= %f _new1___.png'\n", k, C);
     fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
     fprintf(myfile, "splot 'output_new.d' with p\n");
     //fprintf(myfile, "pause -1\n");

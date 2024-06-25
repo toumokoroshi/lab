@@ -17,13 +17,13 @@ FILE* myfile;
 double Y[4], Z[4], Z1[4], K[4][6];
 double X[4];
 double mu = 3.003e-6;
-double t_end = 10;
+double t_end = 0.01;
 double dt = 0.001;
 double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
-double x_min = 0.99;
-double x_max = 1.01;
+double x_min = 1;
+double x_max = 1;
 double x_step = 0.0001;
 double C = 2.999902;
 double y_min, y_max;
@@ -33,14 +33,14 @@ double x, y, vy, vx;
 double V;
 int count;
 int i, j = 0;
-double c1=1/(2*(2-pow(2,1/3)));
-double c2=(1-pow(2,1/3))/(2*(2-pow(2,1/3)));
-double c3=(1-pow(2,1/3))/(2*(2-pow(2,1/3)));
-double c4=1/(2*(2-pow(2,1/3)));
-double d1=1/(2-pow(2,1/3));
-double d2=-pow(2,1/3)/(2-pow(2,1/3));
-double d3=1/(2-pow(2,1/3));
-double d4=0.0;
+double c1 = 1 / (2 * (2 - pow(2, 1 / 3)));
+double c2 = (1 - pow(2, 1 / 3)) / (2 * (2 - pow(2, 1 / 3)));
+double c3 = (1 - pow(2, 1 / 3)) / (2 * (2 - pow(2, 1 / 3)));
+double c4 = 1 / (2 * (2 - pow(2, 1 / 3)));
+double d1 = 1 / (2 - pow(2, 1 / 3));
+double d2 = -pow(2, 1 / 3) / (2 - pow(2, 1 / 3));
+double d3 = 1 / (2 - pow(2, 1 / 3));
+double d4 = 0.0;
 
 double distance1(double x, double y) {
     q1 = (x + mu) * (x + mu) + y * y;
@@ -68,11 +68,11 @@ void equation(int n, const double Y[4], double K[4][6]) {
 }
 
 //equation of motion of backward 
-void equation_sy(double Y[4], const double c, const double d, double Z[4]){
-       Z[0]=Y[0]+(+Y[1]+Y[2])*dt*c;
-       Z[1]=Y[1]+(-Y[0]+Y[3])*dt*c;
-       Z[2]=Y[2]+(+Y[3]-(1-mu)*(Z[0]+mu)/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[0]-1+mu)/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
-       Z[3]=Y[3]+(-Y[2]-(1-mu)*(Z[1])/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[1])/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+void equation_sy(double Y[4], const double c, const double d, double Z[4]) {
+    Z[0] = Y[0] + (+Y[1] + Y[2]) * dt * c;
+    Z[1] = Y[1] + (-Y[0] + Y[3]) * dt * c;
+    Z[2] = Y[2] + (+Y[3] - (1 - mu) * (Z[0] + mu) / pow(((Z[0] + mu) * (Z[0] + mu) + Z[1] * Z[1]), 3. / 2.) - mu * (Z[0] - 1 + mu) / pow(((Z[0] - 1 + mu) * (Z[0] - 1 + mu) + Z[1] * Z[1]), 3. / 2.)) * dt * d;
+    Z[3] = Y[3] + (-Y[2] - (1 - mu) * (Z[1]) / pow(((Z[0] + mu) * (Z[0] + mu) + Z[1] * Z[1]), 3. / 2.) - mu * (Z[1]) / pow(((Z[0] - 1 + mu) * (Z[0] - 1 + mu) + Z[1] * Z[1]), 3. / 2.)) * dt * d;
 }
 
 // void equation_sy(double Y[4], const double c, const double d, double Z[4]){
@@ -124,14 +124,15 @@ int main() {
         count++;
         printf("\b\b\b\b\b\b\b\b\b\b\b");
         printf(" %d / %d", count, (int)((x_max - x_min) / x_step + 1));
-        y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
-        y_min = -y_max;
         // y_max = -0.009;
-        // y_min = -0.01;
+        // y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
+        // y_min = -y_max;
+        y_max = 0.0001;
+        y_min = 0;
         for (y = y_min; y <= y_max; y += x_step) {
             q1 = distance1(x, y);
             q2 = distance2(x, y);
-            // printf("before q2 : %f\n",q2);
+            printf("initial x, initial y, initial r2 : %f, %f, %.10f\n", x, y, q2);
             if (q2 < 0.00007) {
                 continue;
             }
@@ -143,11 +144,14 @@ int main() {
             vx = -k * V * y / q2;
             vy = k * V * (x - 1 + mu) / q2;
 
+
             X[0] = x;
             X[1] = y;
-            X[2] = vx-y;
-            X[3] = vy+x;
+            X[2] = vx - y;
+            X[3] = vy + x;
             t = 0.0;
+            printf("initial vx, initial vy : %f, %f\n\n", vx, vy);
+            printf("initial q0, initial q1 : %f, %f\n\n", X[2], X[3]);
 
             Z[0] = X[0];
             Z[1] = X[1] + epsilon;
@@ -162,41 +166,44 @@ int main() {
             while (t < t_end) {
                 t += dt;
                 q2 = distance2(X[0], X[1]);
+                printf("t : %f\nx, y, r2 : %f, %f, %f \n", t, X[0], X[1], q2);
+                printf("initial q0, initial q1 : %f, %f\n\n", X[2], X[3]);
                 if (q2 < 0.00007) {
                     //fprintf(outputfile, "%f  %f  0\n");
                     break;
-                }else if(q2 > 0.03){
+                }
+                else if (q2 > 0.03) {
                     break;
                 }
 
-                double buff1[4]={0};
-                double buff2[4]={0};
-                double buff3[4]={0};
+                double buff1[4] = { 0 };
+                double buff2[4] = { 0 };
+                double buff3[4] = { 0 };
 
                 //update reference trajetry
-                equation_sy(X,c1,d1,buff1);
-                equation_sy(buff1,c2,d2,buff2);
-                equation_sy(buff2,c3,d3,buff3);
-                equation_sy(buff3,c4,d4,X);
+                equation_sy(X, c1, d1, buff1);
+                equation_sy(buff1, c2, d2, buff2);
+                equation_sy(buff2, c3, d3, buff3);
+                equation_sy(buff3, c4, d4, X);
 
                 //update init y-shifted trajetry
-                equation_sy(Z,c1,d1,buff1);
-                equation_sy(buff1,c2,d2,buff2);
-                equation_sy(buff2,c3,d3,buff3);
-                equation_sy(buff3,c4,d4,Z);
+                equation_sy(Z, c1, d1, buff1);
+                equation_sy(buff1, c2, d2, buff2);
+                equation_sy(buff2, c3, d3, buff3);
+                equation_sy(buff3, c4, d4, Z);
 
                 //update init x-shifted trajetry
-                equation_sy(Z1,c1,d1,buff1);
-                equation_sy(buff1,c2,d2,buff2);
-                equation_sy(buff2,c3,d3,buff3);
-                equation_sy(buff3,c4,d4,Z1);
+                equation_sy(Z1, c1, d1, buff1);
+                equation_sy(buff1, c2, d2, buff2);
+                equation_sy(buff2, c3, d3, buff3);
+                equation_sy(buff3, c4, d4, Z1);
 
             }
-/**
- *ZとZ1にx,yに偏差を与え時間を進めた結果の軌道、Xは微小量を与えていない場合の結果の軌道 
-*/
+            /**
+             *ZとZ1にx,yに偏差を与え時間を進めた結果の軌道、Xは微小量を与えていない場合の結果の軌道
+            */
 
-            if(t<t_end){
+            if (t < t_end) {
                 fprintf(outputfile, "%f  %f  %d\n", x, y);
                 // printf("after q2 : %f\n",q2);
                 // printf("t : %f\n",t);
@@ -259,7 +266,7 @@ int main() {
     fprintf(myfile, "set cblabel 'SALI'\n");
     fprintf(myfile, "set pm3d map\n");
     fprintf(myfile, "set terminal png\n");
-    fprintf(myfile, "set output 'k= %f ,C= %f _new1.png'\n", k, C);
+    fprintf(myfile, "set output 'k= %f ,C= %f _new1__.png'\n", k, C);
     fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
     fprintf(myfile, "splot 'output_new.d' with pm3d\n");
     //fprintf(myfile, "pause -1\n");
