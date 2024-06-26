@@ -17,15 +17,15 @@ FILE* myfile;
 double Y[4], Z[4], Z1[4], K[4][6];
 double X[4];
 double mu = 3.003e-6;
-double t_end = 7;
+double t_end = 10;
 double dt = 0.001;
-double t = 0;
+double t = 10;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
 double x_min = 0.99;
 double x_max = 1.01;
 double x_step = 0.0001;
-double C = 2.999902;
+double C = 3.000201;
 double y_min, y_max;
 double k = -1;  ///////k=1:prograde motion, k=-1:retrograde motion
 double q1, q2;
@@ -112,23 +112,32 @@ int main() {
     }
     printf(" Simulating >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-    for (x = x_min; x <= x_max; x += x_step) {
-        count++;
+   int x_mesh_size = (int)round((x_max-x_min)/x_step)+1;
+
+    x = x_min;
+
+    for (int xloop_counter = 0; xloop_counter < x_mesh_size; xloop_counter++) {
         printf("\b\b\b\b\b\b\b\b\b\b\b");
-        printf(" %d / %d", count, (int)((x_max - x_min) / x_step + 1));
+       printf(" %d / %d", xloop_counter+1, x_mesh_size);
         // y_max = -0.009;
         y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
         y_min = -y_max;
         // y_max = 0.0001;
         // y_min = 0;
-        for (y = y_min; y <= y_max; y += x_step) {
+
+        y = y_min;
+        int y_mesh_size = (int)round((y_max-y_min)/x_step)+1;
+
+        for (int yloop_counter = 0; yloop_counter < y_mesh_size; yloop_counter++) {
             q1 = distance1(x, y);
             q2 = distance2(x, y);
             // printf("initial x, initial y, initial r2 : %f, %f, %.10f\n", x, y, q2);
             if (q2 < 0.00007) {
+                y += x_step;
                 continue;
             }
             else if ((x * x + y * y + 2 * (1 - mu) / q1 + 2 * mu / q2 + mu * (1 - mu) - C) < 0) {   ////////Out of ZVC
+                y += x_step;
                 continue;
             }
 
@@ -197,6 +206,7 @@ int main() {
 
             if (t < t_end) {
                 fprintf(outputfile, "%f  %f  %d\n", x, y,"16");
+                y += x_step;
                 // printf("after q2 : %f\n",q2);
                 // printf("t : %f\n",t);
                 // printf("x[0] : %f, x[1] : %f\n",X[0],X[1]);
@@ -233,10 +243,11 @@ int main() {
             }
             // printf("x : %f, y : %f, SALI : %f\n\n",x,y, SALI);
             fprintf(outputfile, "%f  %f  %f\n", x, y, SALI);
+            y += x_step;
 
         }
         fprintf(outputfile, "\n");
-
+        x += x_step;
     }
     printf("\n Finish simulation!!!!!!\n");
     fclose(outputfile);

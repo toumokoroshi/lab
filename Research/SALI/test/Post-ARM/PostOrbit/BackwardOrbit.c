@@ -6,14 +6,14 @@ FILE* outputfile;
 FILE* myfile;
 FILE* myfile2;
 ///INPUT DATA
-double a = 1.062;
-double e = 0.052;
+double a = 1.023;
+double e = 0.027;
 ///Variable DATA
 double Y[4], Z[4], Z1[4], K[4][6], Y1[4],Y2[4],Y3[4];
 double X[4];
 double mu = 3.003e-6;
-double t_end = 50;
-double dt = 0.0001;
+double t_end = 7;
+double dt = 0.001;
 double t = 0.0;
 double ecc, C_pre;
 double cof, sif;
@@ -68,12 +68,14 @@ int main(){
     printf("  **********************************************************************\n\n");
 
     outputfile = fopen("output_backwardorbit.d", "w");
+    // outputfile = fopen("output.d", "w");
     if (outputfile == NULL) {
         printf("  Can not open write file");
     }
     printf(" Simulating  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
     C_pre = 1 / a + 2 * sqrt(a * (1 - e * e));
+    // C_pre = 2.999902;
 
     ///input capture position////
     x=0.99020;
@@ -136,8 +138,8 @@ int main(){
         fprintf(myfile, "set title 'Retrograde motion'\n");
     }
     fprintf(myfile, "set size ratio 1 1\n");
-    // fprintf(myfile, "set xrange[0.97:1.03]\n");
-    // fprintf(myfile, "set yrange[-0.03:0.03]\n");
+    fprintf(myfile, "set xrange[0.97:1.03]\n");
+    fprintf(myfile, "set yrange[-0.03:0.03]\n");
     fprintf(myfile, "set xlabel font 'Times New Roman, 20'\n");
     fprintf(myfile, "set ylabel font 'Times New Roman, 20'\n");
     fprintf(myfile, "set label 1 point pt 7 ps 2 lc rgb 'blue' at 1 ,0\n");
@@ -157,7 +159,8 @@ int main(){
         fprintf(myfile2, "set title 'Retrograde motion'\n");
     }
     fprintf(myfile2, "set size ratio 1 1\n");
-    fprintf(myfile2, "set xrange[0:20]\n");
+    fprintf(myfile2, "set xrange[0.97:1.03]\n");
+    fprintf(myfile2, "set yrange[-0.03:0.03]\n");
     //fprintf(myfile2, "set yrange[0:1.2]\n");
     fprintf(myfile2, "set xlabel font 'Times New Roman, 20'\n");
     fprintf(myfile2, "set ylabel font 'Times New Roman, 20'\n");

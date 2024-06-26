@@ -22,7 +22,7 @@ double dt = 0.001;
 double t = 0.0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
-double x_min = 0.99;
+double x_min = 1;
 double x_max = 1.01;
 double x_step = 0.0001;
 double C = 3.000201;
@@ -120,23 +120,20 @@ int main() {
         printf("\b\b\b\b\b\b\b\b\b\b\b");
         printf(" %d / %d", xloop_counter+1, x_mesh_size);
         y_max = sqrt(0.01 * 0.01 - (x - 1 + mu) * (x - 1 + mu));
-        y_min = -y_max;
+        y_min = 0;
 
         y = y_min;
         int y_mesh_size = (int)round((y_max-y_min)/x_step)+1;
         
-        // #pragma omp parallel for private(q1, q2, X, Y, Z, Z1, W1, W2, norm1, norm2, UV1, UV2, SALI1, SALI2)
         for (int yloop_counter = 0; yloop_counter < y_mesh_size; yloop_counter++) {
             q1 = distance1(x, y);
             q2 = distance2(x, y);
             // printf("before q2 : %f\n",q2);
             if (q2 < 0.00007) {
-                #pragma omp critical
                 y += x_step;
                 continue;
             }
             else if ((x * x + y * y + 2 * (1 - mu) / q1 + 2 * mu / q2 + mu * (1 - mu) - C) < 0) {   ////////Out of ZVC
-                // #pragma omp critical
                 y += x_step;
                 continue;
             }
@@ -199,8 +196,7 @@ int main() {
 */
 
             if(t<t_end){
-                fprintf(outputfile, "%f  %f  %d\n", x, y,-1);
-                #pragma omp critical
+                fprintf(outputfile, "%f  %f  %d\n", x, y);
                 y += x_step;
                 // printf("after q2 : %f\n",q2);
                 // printf("t : %f\n",t);
@@ -238,7 +234,6 @@ int main() {
             }
             // printf("x : %f, y : %f, SALI : %f\n\n",x,y, SALI);
             fprintf(outputfile, "%f  %f  %f\n", x, y, SALI);
-            // #pragma omp critical
             y += x_step;
         }
         fprintf(outputfile, "\n");
@@ -267,7 +262,7 @@ int main() {
     fprintf(myfile, "set terminal png\n");
     fprintf(myfile, "set output 'k= %f ,C= %f _new1___.png'\n", k, C);
     fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
-    fprintf(myfile, "splot 'output_new.d' with p\n");
+    fprintf(myfile, "splot 'output_new.d' with pm3d\n");
     //fprintf(myfile, "pause -1\n");
     return 0;
 }
