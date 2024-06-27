@@ -22,8 +22,8 @@ double dt = 0.001;
 double t = 0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
 double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
-double x_min = 0.99;
-double x_max = 1.01;
+double x_min = 0.9993;
+double x_max = 0.9993;
 double x_step = 0.0001;
 double C = 3.000201;
 double y_min, y_max;
@@ -33,13 +33,13 @@ double x, y, vy, vx;
 double V;
 int count;
 int i, j = 0;
-double c1 = 1 / (2 * (2 - pow(2, 1 / 3)));
-double c2 = (1 - pow(2, 1 / 3)) / (2 * (2 - pow(2, 1 / 3)));
-double c3 = (1 - pow(2, 1 / 3)) / (2 * (2 - pow(2, 1/ 3)));
-double c4 = 1 / (2 * (2 - pow(2, 1 / 3)));
-double d1 = 1 / (2 - pow(2, 1 / 3));
-double d2 = -pow(2, 1 / 3) / (2 - pow(2, 1 / 3));
-double d3 = 1 / (2 - pow(2, 1 / 3));
+double c1 = 1 / (2 * (2 - pow(2, 1. / 3.)));
+double c2 = (1 - pow(2, 1. / 3.)) / (2 * (2 - pow(2, 1. / 3.)));
+double c3 = (1 - pow(2, 1. / 3.)) / (2 * (2 - pow(2, 1. / 3.)));
+double c4 = 1 / (2 * (2 - pow(2, 1. / 3.)));
+double d1 = 1 / (2 - pow(2, 1. / 3.));
+double d2 = -pow(2, 1. / 3.) / (2 - pow(2, 1. / 3.));
+double d3 = 1 / (2 - pow(2, 1. / 3.));
 double d4 = 0.0;
 
 double distance1(double x, double y) {
@@ -106,7 +106,7 @@ void unitvector(double W[2], double norm, double UV[2]) {
 
 int main() {
 
-    outputfile = fopen("output_ne.d", "w");
+    outputfile = fopen("debug_output_.dat", "w");
     if (outputfile == NULL) {
         printf("  Can not open write file");
     }
@@ -234,7 +234,13 @@ int main() {
                 SALI = norm_SALI1;
             }
             // printf("x : %f, y : %f, SALI : %f\n\n",x,y, SALI);
-            fprintf(outputfile, "%f  %f  %f\n", x, y, SALI);
+            fprintf(outputfile, "init x, init y : %.10f  %.10f\n", x, y);
+            fprintf(outputfile, "Noshift final x, final y, SALI : %.12f  %.12f  %.10f\n", X[0], X[1], SALI);
+            fprintf(outputfile, "yshift final x, final y, SALI : %.12f  %.12f  %.10f\n", Z1[0], Z1[1], SALI);
+            fprintf(outputfile, "devvec0 ,devvec1 : %.12f  %.12f %.12f %.12f\n", W2[0], W2[1], W1[0], W1[1]);
+            fprintf(outputfile, " unit devvec0 , unit devvec1 : %.10f  %.10f %.10f %.10f\n", UV2[0], UV2[1], UV1[0], UV1[1]);
+            fprintf(outputfile, "SALI+ : %.10f  %.10f\n", SALI1[0], SALI1[1]);
+            fprintf(outputfile, "SALI- : %.10f  %.10f\n", SALI2[0], SALI2[1]);
 
         }
         fprintf(outputfile, "\n");
@@ -243,26 +249,26 @@ int main() {
     printf("\n Finish simulation!!!!!!\n");
     fclose(outputfile);
 
-    myfile = popen("gnuplot -persist", "w");
-    fprintf(myfile, "unset key\n");
-    if (k == 1) {
-        fprintf(myfile, "set title 'Prograde motion'\n");
-    }
-    else if (k == -1) {
-        fprintf(myfile, "set title 'Retrograde motion'\n");
-    }
-    fprintf(myfile, "set size ratio 1 1\n");
-    fprintf(myfile, "set xrange[0.99:1.01]\n");
-    fprintf(myfile, "set yrange[-0.01:0.01]\n");
-    fprintf(myfile, "set cbrange[0:1.6]\n");
-    fprintf(myfile, "set xlabel 'x axis'\n");
-    fprintf(myfile, "set ylabel 'y axis'\n");
-    fprintf(myfile, "set cblabel 'SALI'\n");
-    fprintf(myfile, "set pm3d map\n");
-    fprintf(myfile, "set terminal png\n");
-    fprintf(myfile, "set output 'k= %f ,C= %f _new1___0627.png'\n", k, C);
-    fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
-    fprintf(myfile, "splot 'output_ne.d' with pm3d\n");
+    // myfile = popen("gnuplot -persist", "w");
+    // fprintf(myfile, "unset key\n");
+    // if (k == 1) {
+    //     fprintf(myfile, "set title 'Prograde motion'\n");
+    // }
+    // else if (k == -1) {
+    //     fprintf(myfile, "set title 'Retrograde motion'\n");
+    // }
+    // fprintf(myfile, "set size ratio 1 1\n");
+    // fprintf(myfile, "set xrange[0.99:1.01]\n");
+    // fprintf(myfile, "set yrange[-0.01:0.01]\n");
+    // fprintf(myfile, "set cbrange[0:1.6]\n");
+    // fprintf(myfile, "set xlabel 'x axis'\n");
+    // fprintf(myfile, "set ylabel 'y axis'\n");
+    // fprintf(myfile, "set cblabel 'SALI'\n");
+    // fprintf(myfile, "set pm3d map\n");
+    // fprintf(myfile, "set terminal png\n");
+    // fprintf(myfile, "set output 'k= %f ,C= %f _new1___0626.png'\n", k, C);
+    // fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
+    // fprintf(myfile, "splot 'output_new_.d' with pm3d\n");
     //fprintf(myfile, "pause -1\n");
     return 0;
 }

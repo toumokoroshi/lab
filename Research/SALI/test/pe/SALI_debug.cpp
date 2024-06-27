@@ -39,7 +39,6 @@ int main()
 
     std::string dateTime = getCurrentDateTime();
     std::string fileName = dateTime + ".dat";
-    // std::string fileName = "sample.dat";
     std::ofstream outFile(fileName);
     if (!outFile)
     {
@@ -52,8 +51,8 @@ int main()
         << std::endl;
 
     double init_x;
-    double x_min = 0.99;
-    double x_max = 1.01;
+    double x_min = 0.9993;
+    double x_max = 0.9993;
     double x_step = 0.0001;
 
     init_x = x_min;
@@ -159,7 +158,7 @@ int main()
             double SALI0[2];
             double SALI1[2];
 
-            for (int i=0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
                 SALI0[i] = dev_vec_unit0[i] + dev_vec_unit1[i];
                 SALI1[i] = dev_vec_unit0[i] - dev_vec_unit1[i];
@@ -180,9 +179,19 @@ int main()
             // std::cout << " after SALI = " << SALI << "\n"
             //     << std::endl;
 
+
+
+            outFile << "initx, inity : " << init_x << " " << init_y << std::endl;
+            outFile << "No shift x, y, SALI : " << std::fixed << std::setprecision(10) << pcrtbp0.get_x() << " " << std::fixed << std::setprecision(10) << pcrtbp0.get_y() << " " << SALI << std::endl;
+            outFile << "y shift x, y, SALI : " << std::fixed << std::setprecision(10) << pcrtbp2.get_x() << " " << std::fixed << std::setprecision(10) << pcrtbp2.get_y() << " " << SALI << std::endl;
+            outFile << "devvec0, devvec1 : " << std::fixed << std::setprecision(10) << dev_vec0[0] << " " << std::fixed << std::setprecision(10) << dev_vec0[1] << " " << std::fixed << std::setprecision(10) << dev_vec1[0] << " " << std::fixed << std::setprecision(10) << dev_vec1[1] << std::endl;
+            outFile << "unit devvec0, unit devvec1 : " << dev_vec_unit0[0] << " " << dev_vec_unit0[1] << " " << dev_vec_unit1[0] << " " << dev_vec_unit1[1] << " " << init_y << std::endl;
+            outFile << "SALI+ : " << SALI0[0] << " " << SALI0[1] << " " << std::endl;
+            outFile << "SALI- : " << SALI1[0] << " " << SALI1[1] << " " << std::endl;
+
             /*debug codes end here */
 
-            outFile << init_x << " " << init_y << " " << SALI << std::endl;
+            // outFile << init_x << " " << init_y << " " << SALI << std::endl;
             // outFile << pcrtbp0.get_x() << " " << pcrtbp0.get_y() << std::endl;
             init_y += x_step;
         }
@@ -194,40 +203,40 @@ int main()
     std::cout << "\n\n"
         << "Simulation finished" << std::endl;
 
-    // gnuplotコマンドを使うためにファイルを開く
-    FILE* myfile = popen("gnuplot -persist", "w");
+    // // gnuplotコマンドを使うためにファイルを開く
+    // FILE* myfile = popen("gnuplot -persist", "w");
 
-    if (myfile == nullptr)
-    {
-        std::cerr << "Failed to open gnuplot." << std::endl;
-        return 1;
-    }
+    // if (myfile == nullptr)
+    // {
+    //     std::cerr << "Failed to open gnuplot." << std::endl;
+    //     return 1;
+    // }
 
-    // gnuplotコマンドを送信
-    fprintf(myfile, "unset key\n");
-    if (k == 1)
-    {
-        fprintf(myfile, "set title 'Prograde motion'\n");
-    }
-    else if (k == -1)
-    {
-        fprintf(myfile, "set title 'Retrograde motion'\n");
-    }
-    fprintf(myfile, "set size ratio 1 1\n");
-    fprintf(myfile, "set xrange[0.99:1.01]\n");
-    fprintf(myfile, "set yrange[-0.01:0.01]\n");
-    fprintf(myfile, "set cbrange[0:1.6]\n");
-    fprintf(myfile, "set xlabel 'x axis'\n");
-    fprintf(myfile, "set ylabel 'y axis'\n");
-    fprintf(myfile, "set cblabel 'SALI'\n");
-    fprintf(myfile, "set pm3d map\n");
-    fprintf(myfile, "set terminal png\n");
-    fprintf(myfile, "set output 'k= %d ,C= %f _new.png'\n", k, C_jacobi);
-    fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
-    fprintf(myfile, "splot '%s' with pm3d\n", fileName.c_str());
+    // // gnuplotコマンドを送信
+    // fprintf(myfile, "unset key\n");
+    // if (k == 1)
+    // {
+    //     fprintf(myfile, "set title 'Prograde motion'\n");
+    // }
+    // else if (k == -1)
+    // {
+    //     fprintf(myfile, "set title 'Retrograde motion'\n");
+    // }
+    // fprintf(myfile, "set size ratio 1 1\n");
+    // fprintf(myfile, "set xrange[0.99:1.01]\n");
+    // fprintf(myfile, "set yrange[-0.01:0.01]\n");
+    // fprintf(myfile, "set cbrange[0:1.6]\n");
+    // fprintf(myfile, "set xlabel 'x axis'\n");
+    // fprintf(myfile, "set ylabel 'y axis'\n");
+    // fprintf(myfile, "set cblabel 'SALI'\n");
+    // fprintf(myfile, "set pm3d map\n");
+    // fprintf(myfile, "set terminal png\n");
+    // fprintf(myfile, "set output 'k= %d ,C= %f _new.png'\n", k, C_jacobi);
+    // fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
+    // fprintf(myfile, "splot '%s' with pm3d\n", fileName.c_str());
 
-    // ファイルを閉じる
-    pclose(myfile);
+    // // ファイルを閉じる
+    // pclose(myfile);
 
     return 0;
 }
