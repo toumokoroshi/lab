@@ -17,7 +17,7 @@ FILE* myfile;
 double Y[4], Z[4], Z1[4], K[4][6];
 double X[4];
 double mu = 3.003e-6;
-double t_end = 7;
+double t_end = 10;
 double dt = 0.001;
 double t = 0;
 double norm1, norm2, norm_SALI1, norm_SALI2, SALI;
@@ -25,7 +25,7 @@ double UV1[2], UV2[2], SALI2[2], SALI1[2], W1[2], W2[2];
 double x_min = 0.99;
 double x_max = 1.01;
 double x_step = 0.0001;
-double C = 2.999902;
+double C = 3.000201;
 double y_min, y_max;
 double k = -1;  ///////k=1:prograde motion, k=-1:retrograde motion
 double q1, q2;
@@ -33,13 +33,13 @@ double x, y, vy, vx;
 double V;
 int count;
 int i, j = 0;
-double c1 = 1 / (2 * (2 - pow(2, 1 / 3)));
-double c2 = (1 - pow(2, 1 / 3)) / (2 * (2 - pow(2, 1 / 3)));
-double c3 = (1 - pow(2, 1 / 3)) / (2 * (2 - pow(2, 1 / 3)));
-double c4 = 1 / (2 * (2 - pow(2, 1 / 3)));
-double d1 = 1 / (2 - pow(2, 1 / 3));
-double d2 = -pow(2, 1 / 3) / (2 - pow(2, 1 / 3));
-double d3 = 1 / (2 - pow(2, 1 / 3));
+double c1 = 1 / (2 * (2 - pow(2, 1. / 3.)));
+double c2 = (1 - pow(2, 1. / 3.)) / (2 * (2 - pow(2, 1. / 3.)));
+double c3 = (1 - pow(2, 1. / 3.)) / (2 * (2 - pow(2, 1. / 3.)));
+double c4 = 1 / (2 * (2 - pow(2, 1. / 3.)));
+double d1 = 1 / (2 - pow(2, 1. / 3.));
+double d2 = -pow(2, 1. / 3.) / (2 - pow(2, 1. / 3.));
+double d3 = 1 / (2 - pow(2, 1. / 3.));
 double d4 = 0.0;
 
 double distance1(double x, double y) {
@@ -124,7 +124,9 @@ int main() {
         for (y = y_min; y <= y_max; y += x_step) {
             q1 = distance1(x, y);
             q2 = distance2(x, y);
-            // printf("initial x, initial y, initial r2 : %f, %f, %.10f\n", x, y, q2);
+            
+            // printf("c : %.20f, %.20f, %.20f, %.20f\n", c1,c2,c3,c4);
+            // printf("initial x, initial y, initial r2 : %.10f, %.10f, %.10f\n", x, y, q2);
             if (q2 < 0.00007) {
                 continue;
             }
@@ -142,8 +144,8 @@ int main() {
             X[2] = vx - y;
             X[3] = vy + x;
             t = 0.0;
-            // printf("initial vx, initial vy : %f, %f\n\n", vx, vy);
-            // printf("initial q0, initial q1 : %f, %f\n\n", X[2], X[3]);
+            // printf("initial vx, initial vy : %.10f, %.10f\n\n", vx, vy);
+            // printf("initial q0, initial q1 : %.10f, %.10f\n\n", X[2], X[3]);
 
             Z[0] = X[0];
             Z[1] = X[1] + epsilon;
@@ -158,8 +160,8 @@ int main() {
             while (t < t_end) {
                 t += dt;
                 q2 = distance2(X[0], X[1]);
-                // printf("t : %f\nx, y, r2 : %f, %f, %f \n", t, X[0], X[1], q2);
-                // printf("initial q0, initial q1 : %f, %f\n\n", X[2], X[3]);
+                // printf("t : %f\nx, y, r2 : %.10f, %.10f, %.10f \n", t, X[0], X[1], q2);
+                // printf(" q0,  q1 : %.10f, %.10f\n\n", X[2], X[3]);
                 if (q2 < 0.00007) {
                     //fprintf(outputfile, "%f  %f  0\n");
                     break;
@@ -196,7 +198,7 @@ int main() {
             */
 
             if (t < t_end) {
-                fprintf(outputfile, "%f  %f  %d\n", x, y,"16");
+                fprintf(outputfile, "%f  %f  %d\n", x, y,16);
                 // printf("after q2 : %f\n",q2);
                 // printf("t : %f\n",t);
                 // printf("x[0] : %f, x[1] : %f\n",X[0],X[1]);
@@ -258,9 +260,9 @@ int main() {
     fprintf(myfile, "set cblabel 'SALI'\n");
     fprintf(myfile, "set pm3d map\n");
     fprintf(myfile, "set terminal png\n");
-    fprintf(myfile, "set output 'k= %f ,C= %f _new1___.png'\n", k, C);
+    fprintf(myfile, "set output 'k= %f ,C= %f _new1___0626.png'\n", k, C);
     fprintf(myfile, "set palette defined (0.0 \"blue\", 0.1 \"green\", 0.2 \"yellow\",0.3 \"red\")\n");
-    fprintf(myfile, "splot 'output_new.d' with pm3d\n");
+    fprintf(myfile, "splot 'output_new_.d' with pm3d\n");
     //fprintf(myfile, "pause -1\n");
     return 0;
 }

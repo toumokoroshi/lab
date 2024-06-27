@@ -12,7 +12,7 @@ double e = 0.027;
 double Y[4], Z[4], Z1[4], K[4][6], Y1[4],Y2[4],Y3[4];
 double X[4];
 double mu = 3.003e-6;
-double t_end = 7;
+double t_end = 10;
 double dt = 0.001;
 double t = 0.0;
 double ecc, C_pre;
@@ -49,11 +49,18 @@ double distance2(double x, double y) {
 }
 
 // ////equation of motion of backward 
-void equation_sy(double Y[4], const double c, const double d, double Z[4]){
-       Z[0]=Y[0]-(+Y[1]+Y[2])*dt*c;
-       Z[1]=Y[1]-(-Y[0]+Y[3])*dt*c;
-       Z[2]=Y[2]-(+Y[3]-(1-mu)*(Z[0]+mu)/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[0]-1+mu)/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
-       Z[3]=Y[3]-(-Y[2]-(1-mu)*(Z[1])/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[1])/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+// void equation_sy(double Y[4], const double c, const double d, double Z[4]){
+//        Z[0]=Y[0]-(+Y[1]+Y[2])*dt*c;
+//        Z[1]=Y[1]-(-Y[0]+Y[3])*dt*c;
+//        Z[2]=Y[2]-(+Y[3]-(1-mu)*(Z[0]+mu)/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[0]-1+mu)/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+//        Z[3]=Y[3]-(-Y[2]-(1-mu)*(Z[1])/pow(((Z[0]+mu)*(Z[0]+mu)+Z[1]*Z[1]),3./2.)-mu*(Z[1])/pow(((Z[0]-1+mu)*(Z[0]-1+mu)+Z[1]*Z[1]),3./2.))*dt*d;
+// }
+
+void equation_sy(double Y[4], const double c, const double d, double Z[4]) {
+    Z[0] = Y[0] + (+Y[1] + Y[2]) * dt * c;
+    Z[1] = Y[1] + (-Y[0] + Y[3]) * dt * c;
+    Z[2] = Y[2] + (+Y[3] - (1 - mu) * (Z[0] + mu) / pow(((Z[0] + mu) * (Z[0] + mu) + Z[1] * Z[1]), 3. / 2.) - mu * (Z[0] - 1 + mu) / pow(((Z[0] - 1 + mu) * (Z[0] - 1 + mu) + Z[1] * Z[1]), 3. / 2.)) * dt * d;
+    Z[3] = Y[3] + (-Y[2] - (1 - mu) * (Z[1]) / pow(((Z[0] + mu) * (Z[0] + mu) + Z[1] * Z[1]), 3. / 2.) - mu * (Z[1]) / pow(((Z[0] - 1 + mu) * (Z[0] - 1 + mu) + Z[1] * Z[1]), 3. / 2.)) * dt * d;
 }
 
 
@@ -67,17 +74,17 @@ int main(){
     printf("  *  Last Update : 2020.10.18                                          *\n");
     printf("  **********************************************************************\n\n");
 
-    outputfile = fopen("output_backwardorbit.d", "w");
-    // outputfile = fopen("output.d", "w");
+    // outputfile = fopen("output_backwardorbit.d", "w");
+    outputfile = fopen("output.d", "w");
     if (outputfile == NULL) {
         printf("  Can not open write file");
     }
     printf(" Simulating  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n");
 
-    C_pre = 1 / a + 2 * sqrt(a * (1 - e * e));
-    // C_pre = 2.999902;
+    // C_pre = 1 / a + 2 * sqrt(a * (1 - e * e));
+    C_pre = 2.999902;
 
-    ///input capture position////
+    // /input capture position////
     x=0.99020;
     y=0.000195;
 
@@ -147,7 +154,7 @@ int main(){
     fprintf(myfile, "set ylabel 'y axis'\n");
     fprintf(myfile, "set terminal png\n");
     fprintf(myfile, "set output 'Orbit.png'\n");
-    fprintf(myfile, "plot 'output.d' using 3:4 w l title ' Captured Orbit', 'output_backwardorbit.d' using 3:4 w l title 'Natural Orbit',  'output.d' using 3:4 every ::0::0  pt 7 ps 2 title 'Capture point'\n");
+    fprintf(myfile, "plot 'output.d' using 3:4 w l title ' Captured Orbit', 'output_backwardorbit.d' using 3:4 w l                                                                                                                                                                                                  title 'Natural Orbit',  'output.d' using 3:4 every ::0::0  pt 7 ps 2 title 'Capture point'\n");
     //fprintf(myfile, "pause -1\n");
 
     myfile2 = popen("gnuplot -persist", "w");

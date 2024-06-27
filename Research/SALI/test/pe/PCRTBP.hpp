@@ -71,6 +71,8 @@ public:
     double *get_xvec();
     double *get_vvec();
 
+    void print_c();
+
     void set_x(double x, double y);
     void set_v(); // 未実装のため保留
     void set_dt(double dt);
@@ -112,6 +114,10 @@ double PCRTBP::get_mu() const { return mu; }
 double PCRTBP::get_dt() const { return dt; }
 double *PCRTBP::get_xvec() { return x; }
 double *PCRTBP::get_vvec() { return v; }
+
+void PCRTBP::print_c(){
+    std::cout << c[0] << ", " << c[1] << ", " << c[2] << ", " << c[3] << std::endl;
+}
 
 void PCRTBP::set_x(double x, double y)
 {
