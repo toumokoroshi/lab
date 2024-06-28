@@ -1,9 +1,14 @@
-/**
- * @file
- * @brief 平面円制限三体問題（Planar Circular Restricted Three-Body Problem : PCRTBP）を扱うクラス
- * @author tabata
- * @date 2024/06/18
- */
+
+////////////////////////////////////////////////////////////////////////////////
+/// @file           PCRTBP.hpp
+/// @brief          Class for handling the Planar Circular Restricted Three-Body Problem (PCRTBP)
+/// @author         tabata
+/// @date           2024/06/18
+/// @note           If you have any remarks to note in the file, write them here
+/// @attention      If you have any cautions to note in the file, write them here
+/// @par            2024/06/18 ver1.0 Created by tabata
+///
+////////////////////////////////////////////////////////////////////////////////
 
 #ifndef PCRTBP_H_
 #define PCRTBP_H_
@@ -35,31 +40,35 @@ private:
     double mu;
     //! time step for integration
     double dt;
-    // coeficient c in forth order symplectic method
+    // coeficient c in the forth order symplectic method
     double c[4] =
-        {
-            1 / (2 * (2 - std::pow(2, 1.0 / 3.0))),
-            (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
-            (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
-            1 / (2 * (2 - std::pow(2, 1.0 / 3.0)))};
-    // coeficient d in forth order symplectic method
+    {
+        1 / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+        (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+        (1 - std::pow(2, 1.0 / 3.0)) / (2 * (2 - std::pow(2, 1.0 / 3.0))),
+        1 / (2 * (2 - std::pow(2, 1.0 / 3.0))) };
+    // coeficient d in the forth order symplectic method
     double d[4] =
-        {
-            1 / (2 - std::pow(2, 1.0 / 3.0)),
-            -std::pow(2, 1.0 / 3.0) / (2 - std::pow(2, 1.0 / 3.0)),
-            1 / (2 - std::pow(2, 1.0 / 3.0)),
-            0.0};
+    {
+        1 / (2 - std::pow(2, 1.0 / 3.0)),
+        -std::pow(2, 1.0 / 3.0) / (2 - std::pow(2, 1.0 / 3.0)),
+        1 / (2 - std::pow(2, 1.0 / 3.0)),
+        0.0 };
 
 public:
     /**
-     * @brief コンストラクタ
-     * @param x 初期位置のx座標
-     * @param y 初期位置のy座標
-     * @param k 運動の種類 (1: prograde, -1: retrograde)
-     * @param c_jacobi ヤコビ積分
+     * @brief Constructor
+     * @param x Initial x-coordinate
+     * @param y Initial y-coordinate
+     * @param k Type of motion (1: prograde, -1: retrograde)
+     * @param c_jacobi Jacobi integral
      */
+
     PCRTBP(double x, double y, int k, double c_jacobi);
 
+    /**
+     * @brief Return a value corresponding to the function name 
+     */
     double get_x() const;
     double get_y() const;
     double get_vx() const;
@@ -68,8 +77,11 @@ public:
     double get_q1() const;
     double get_mu() const;
     double get_dt() const;
-    double *get_xvec();
-    double *get_vvec();
+    /**
+     * @brief Return an array corresponding to the function name 
+     */
+    double* get_xvec();
+    double* get_vvec();
 
     void print_c();
 
@@ -79,11 +91,15 @@ public:
 
     double calc_r1() const;
     double calc_r2() const;
+
+    /**
+     * @brief Update x[2] and q[2] after a small time step dt based on the fourth-order symplectic integration method
+     */
     void symplectic_integration_step();
 };
 
 PCRTBP::PCRTBP(double x, double y, int k, double c_jacobi)
-    : x{x, y}, c_jacobi(c_jacobi), k(k), mu(3.003e-6), dt(0.001)
+    : x{ x, y }, c_jacobi(c_jacobi), k(k), mu(3.003e-6), dt(0.001)
 {
 
     double r1 = std::sqrt((x + mu) * (x + mu) + y * y);
@@ -112,10 +128,10 @@ double PCRTBP::get_q0() const { return q[0]; }
 double PCRTBP::get_q1() const { return q[1]; }
 double PCRTBP::get_mu() const { return mu; }
 double PCRTBP::get_dt() const { return dt; }
-double *PCRTBP::get_xvec() { return x; }
-double *PCRTBP::get_vvec() { return v; }
+double* PCRTBP::get_xvec() { return x; }
+double* PCRTBP::get_vvec() { return v; }
 
-void PCRTBP::print_c(){
+void PCRTBP::print_c() {
     std::cout << c[0] << ", " << c[1] << ", " << c[2] << ", " << c[3] << std::endl;
 }
 

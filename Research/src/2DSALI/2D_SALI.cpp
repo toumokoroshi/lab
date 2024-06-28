@@ -1,14 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////
-/// @file           SALI.c
+/// @file           2D_SALI.cpp
 /// @brief          櫻井さんの研究に基づいてSALIの計算を行う
 /// @author         tabata
-/// @date           ファイル作成年月日
-/// $Version:       0.0$
-/// $Revision:      0$
+/// @date           2024/6/28
 /// @note           ファイルに備考などを明記する場合はここへ書き込む
 /// @attention      ファイルに注意書きなどを明記する場合はここへ書き込む
-/// @par            History
-///                 ファイルに履歴などを明記する場合はここへ書き込む
+/// @par            ver1.0/tabata/初版を作成
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -22,8 +19,8 @@
 #include <chrono>
 #include <cstdio>
 
-#include "C:\Development\lab\Research\SALI\test\pe\PCRTBP.hpp"
-#include "C:\Development\lab\Research\SALI\test\pe\calc.h"
+#include "PCRTBP.hpp"
+#include "calc.h"
 
 void progressBar(int progress, int total);
 std::string getCurrentDateTime();
