@@ -22,8 +22,8 @@
 #include <chrono>
 #include <cstdio>
 
-#include "C:\Development\lab\Research\SALI\test\pe\PCRTBP.hpp"
-#include "C:\Development\lab\Research\SALI\test\pe\calc.h"
+#include "PCRTBP.hpp"
+#include "calc.h"
 
 void progressBar(int progress, int total);
 std::string getCurrentDateTime();
