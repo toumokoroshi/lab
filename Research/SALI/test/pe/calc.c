@@ -1,4 +1,4 @@
-#include "C:\Development\lab\Research\SALI\test\pe\calc.h"
+#include "calc.h"
 
 void calc_deviation_vector( const double input_vector0[2], const double input_vector1[2], double output_vector[2])
 {
